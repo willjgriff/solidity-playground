@@ -26,14 +26,28 @@ contract("Escrow", () => {
 	it("lockPayment should receive payment from the sender address", () => {
 		var paymentValue = 1000;
 		return escrow.lockPayment({ from: senderAddress, value: paymentValue, gasPrice: 20000000000, gas: 500000 })
-			.then((tx) => { return web3.eth.getBalance(escrow.address) })
-			.then((balance) => { assert.equal(balance.toNumber(), paymentValue, "contract value is not equal to the payment made") })
+			.then((tx) => {
+				var contractBalance = web3.eth.getBalance(escrow.address);
+				assert.equal(contractBalance.toNumber(), paymentValue, "contract value is not equal to the payment made") 
+			});
 	});
 
 	it("releasePayment should throw when called from an address other than the sender or arbiter", () => {
 		Utils.assertThrows(() => { 
-			return escrow.releasePayment({ from: receiverAddress, value: 1000, gasPrice: 20000000000, gas: 500000 }) }, 
+			return escrow.releasePayment({ from: receiverAddress, gasPrice: 20000000000, gas: 500000 }) }, 
 				500000);
 	});
+
+	it("releasePayment should send the receiver the contract balance when requested by the sender", () => {
+		var paymentValue = 1000;
+		var receiverOriginalBalance = web3.eth.getBalance(receiverAddress).toNumber();
+
+		return escrow.lockPayment({ from: senderAddress, value: paymentValue, gasPrice: 20000000000, gas: 500000 })
+			.then((tx) => { escrow.releasePayment({ from: senderAddress, gasPrice: 20000000000, gas: 500000 }) })
+			.then((tx) => { 
+				var receiverNewBalance = web3.eth.getBalance(receiverAddress).toNumber();
+				assert.equal(receiverNewBalance, receiverOriginalBalance + paymentValue, "Receivers balance is incorrect") 
+			})
+	})
 
 });

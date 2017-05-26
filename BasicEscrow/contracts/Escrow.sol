@@ -6,7 +6,7 @@ contract Escrow {
 	address public receiver;
 
 	function Escrow(address senderArg, address receiverArg) {
-	    arbiter = msg.sender;
+		arbiter = msg.sender;
 		sender = senderArg;
 		receiver = receiverArg;
 	}
