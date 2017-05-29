@@ -90,8 +90,14 @@
       "links": {},
       "address": "0xd1afd2dacc2d5b456ccee7ebc327447422fee5c0",
       "updated_at": 1495815202042
+    },
+    "1496013337397": {
+      "events": {},
+      "links": {},
+      "address": "0x8b70194eba2c975cd34f5a0ed19674175c2cb7c7",
+      "updated_at": 1496094551902
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1495815202042
+  "updated_at": 1496094551902
 }
