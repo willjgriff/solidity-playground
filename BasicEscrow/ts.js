@@ -1,3 +1,4 @@
+"use strict";
 
 var Utils = require("./Utils/Web3Utils.js")
 var Escrow = artifacts.require("./Escrow.sol")

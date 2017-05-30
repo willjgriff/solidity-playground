@@ -1,4 +1,4 @@
-
+"use strict";
 // Tests that can't seem to be done from a Solidity Test contract, mainly because the test 
 // contract can't easily sign a transaction from an address other than it's own.
 
