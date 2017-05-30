@@ -5,6 +5,7 @@
 var Utils = require("./../Utils/TestUtils.js");
 var Web3Utils = require("./../Utils/Web3Utils.js");
 var Escrow = artifacts.require("./Escrow.sol");
+var BigNumber = require("bignumber.js");
 
 contract("Escrow", () => {
 
@@ -16,7 +17,7 @@ contract("Escrow", () => {
 	var senderAddress = web3.eth.accounts[1];
 	var receiverAddress = web3.eth.accounts[2];
 
-	// To recreate the contract before each test, closer to Unit testing this way.
+	// Recreate the contract before each test, closer to Unit testing this way.
 	beforeEach(() => {
 		return Escrow.new(senderAddress, receiverAddress, { from: arbiterAddress })
 			.then((instance) => { escrow = instance });
@@ -41,27 +42,27 @@ contract("Escrow", () => {
 			return escrow.releasePayment({ from: receiverAddress, gasPrice: gasPrice, gas: gasLimit }) }, gasLimit);
 	});
 
-// This test fails sometimes.
 	it("releasePayment should send the receiver the contract balance when requested by the sender", () => {
-		var receiverOriginalBalance = web3.eth.getBalance(receiverAddress).toNumber();
+		var receiverOriginalBalance = web3.eth.getBalance(receiverAddress);
 
 		return escrow.lockPayment({ from: senderAddress, value: paymentValue, gasPrice: gasPrice, gas: gasLimit })
 			.then((tx) => { return escrow.releasePayment({ from: senderAddress, gasPrice: gasPrice, gas: gasLimit }) })
 			.then((tx) => { 
-				var receiverNewBalance = web3.eth.getBalance(receiverAddress).toNumber();
-				assert.equal(receiverNewBalance, receiverOriginalBalance + paymentValue, "Receivers balance is incorrect") 
+				var receiverNewBalance = web3.eth.getBalance(receiverAddress).toString();
+				var receiverOriginalPlusPayment = receiverOriginalBalance.plus(paymentValue).toString();
+				assert.equal(receiverNewBalance, receiverOriginalPlusPayment, "Receivers balance is incorrect") 
 			});
 	});
 
-// This test fails sometimes.
 	it("releasePayment should send the receiver the contract balance when requested by the arbiter", () => {
-		var receiverOriginalBalance = web3.eth.getBalance(receiverAddress).toNumber();
+		var receiverOriginalBalance = web3.eth.getBalance(receiverAddress);
 
 		return escrow.lockPayment({ from: senderAddress, value: paymentValue, gasPrice: gasPrice, gas: gasLimit })
 			.then((tx) => { return escrow.releasePayment({ from: arbiterAddress, gasPrice: gasPrice, gas: gasLimit }); })
 			.then((tx) => { 
-				var receiverNewBalance = web3.eth.getBalance(receiverAddress).toNumber();
-				assert.equal(receiverNewBalance, receiverOriginalBalance + paymentValue, "Receivers balance is incorrect") 
+				var receiverNewBalance = web3.eth.getBalance(receiverAddress).toString();
+				var receiverOriginalPlusPayment = receiverOriginalBalance.plus(paymentValue).toString();
+				assert.equal(receiverNewBalance, receiverOriginalPlusPayment, "Receivers balance is incorrect") 
 			});
 	});
 
@@ -70,25 +71,19 @@ contract("Escrow", () => {
 			return escrow.returnPayment({ from: senderAddress, gasPrice: gasPrice, gas: gasLimit } )}, gasLimit)
 	});
 
-// This test fails sometimes.
-	it("returnPayment should send contract balance to sender when called by arbiter", () => {
-		var originalSenderBalance = web3.eth.getBalance(senderAddress).toNumber();
+	it("returnPayment should return contract balance to sender when called by arbiter", () => {
+		var originalSenderBalance = web3.eth.getBalance(senderAddress);
+		var originalSenderBalanceMinusGas;
 
 		return escrow.lockPayment({ from: senderAddress, value: paymentValue, gasPrice: gasPrice, gas: gasLimit })
 			.then((tx) => { 
-				var senderDeductedBalance = Web3Utils.rawBalance(senderAddress);
-
-				originalSenderBalance -= tx.receipt.gasUsed * gasPrice;
-
-				console.log(originalSenderBalance);
-				console.log(paymentValue);
-				console.log(tx.receipt.gasUsed * gasPrice);
-
-				// assert.equal(senderDeductedBalance, originalSenderBalance - paymentValue - tx.gas, "Senders deducted balance is incorrect");
+				var gasPriceBigNumber = new BigNumber(gasPrice);
+				var gasCost = gasPriceBigNumber.times(tx.receipt.gasUsed);
+				originalSenderBalanceMinusGas = originalSenderBalance.minus(gasCost);
 				return escrow.returnPayment({ from: arbiterAddress, gasPrice: gasPrice, gas: gasLimit }) })
 			.then((tx) => { 
-				var senderNewBalance = web3.eth.getBalance(senderAddress).toNumber();
-				assert.equal(senderNewBalance, originalSenderBalance, "Senders balance is incorrect");
+				var senderNewBalance = web3.eth.getBalance(senderAddress).toString();
+				assert.equal(senderNewBalance, originalSenderBalanceMinusGas.toString(), "Senders balance is incorrect");
 			});
 	});
 
