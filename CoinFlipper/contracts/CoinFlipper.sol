@@ -17,16 +17,16 @@ contract CoinFlipper {
 	}
 	
 	modifier whenTxValueEqualsBalance {
-	    if (msg.value == this.balance - msg.value) {
-	        _;
-	    } else {
-	    	throw;
-	    }
+		if (msg.value == this.balance - msg.value) {
+			_;
+		} else {
+			throw;
+		}
 	}
 
 	function makeWager() payable whenState(State.noWager) {
-        state = State.wagerMade;
-        wagerMaker = msg.sender;
+		state = State.wagerMade;
+		wagerMaker = msg.sender;
 	}
 	
 	function acceptWager() 
@@ -34,14 +34,14 @@ contract CoinFlipper {
 		whenState(State.wagerMade) 
 		whenTxValueEqualsBalance 
 	{
-	    state = State.wagerAccepted;
-	    wagerAccepter = msg.sender;
+		state = State.wagerAccepted;
+		wagerAccepter = msg.sender;
 	}
 	
 	function decideWager() whenState(State.wagerAccepted) {
-	    // This requires some randomness to determine the winner
-	    wagerMaker.transfer(this.balance);
-	    state = State.noWager;
+		// This requires some randomness to determine the winner
+		wagerMaker.transfer(this.balance);
+		state = State.noWager;
 	}
 
 }
