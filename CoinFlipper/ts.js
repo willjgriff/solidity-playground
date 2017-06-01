@@ -3,7 +3,7 @@
 var Utils = require("./Utils/Web3Utils.js");
 var CoinFlipper = artifacts.require("./CoinFlipper.sol");
 var coinFlipper = CoinFlipper.deployed();
-var contractAddress = "0xbbe00905936b2795835a58f07c75cfd47b167903";
+var contractAddress = "0xe30bbdd70ca4cf38a43abc9d83d710824e30b4a2";
 
 var creator = web3.eth.accounts[0];
 var wagerCreator = web3.eth.accounts[1];
