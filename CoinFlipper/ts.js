@@ -1,9 +1,10 @@
 "use strict";
 
 var Utils = require("./Utils/Web3Utils.js");
-var CoinFlipper = artifacts.require("./CoinFlipper.sol");
+// var CoinFlipper = artifacts.require("./BlockDecidingCoinFlipper.sol");
+var CoinFlipper = artifacts.require("./OracleDecidingCoinFlipper.sol");
 var coinFlipper = CoinFlipper.deployed();
-var contractAddress = "0xe30bbdd70ca4cf38a43abc9d83d710824e30b4a2";
+var contractAddress = "0xe0a4b07250a0d5f5f716eda101a5405b160d8abb";
 
 var creator = web3.eth.accounts[0];
 var wagerCreator = web3.eth.accounts[1];
@@ -12,11 +13,11 @@ const gasPrice = 20000000000;
 const gasLimit = 500000;
 
 // CURRENT STATE
-coinFlipper
-	.then((instance) => { return instance.state.call() })
-	.then((currentState) => { 
-		console.log("Contract state (0-noWager, 1-wagerMade, 2-wagerAccepted): " + currentState.toString()
-			+ "\nContract balance, ether: " + Utils.balance(contractAddress)) });
+// coinFlipper
+// 	.then((instance) => { return instance.state.call() })
+// 	.then((currentState) => { 
+// 		console.log("Contract state (0-noWager, 1-wagerMade, 2-wagerAccepted): " + currentState.toString()
+// 			+ "\nContract balance, ether: " + Utils.balance(contractAddress)) });
 
 // MAKE WAGER
 // coinFlipper
@@ -30,13 +31,26 @@ coinFlipper
 // 		{ from: wagerAccepter, value: Utils.etherToWei(1), gasPrice: gasPrice, gas: gasLimit }) })
 // 	.then((tx) => { "Contract balance: " + Utils.balance(contractAddress) });
 
-// DECIDE WAGER
+// DECIDE WAGER BLOCK FLIPPER
+// coinFlipper
+// 	.then((instance) => { return instance.decideWager({ gasPrice: gasPrice, gas: gasLimit }) })
+// 	.then((tx) => { 
+// 		console.log("Contract balance: " + Utils.balance(contractAddress));
+// 		console.log("Wager creator balance: " + Utils.balance(wagerCreator));
+// 		console.log("Wager accepter balance: " + Utils.balance(wagerAccepter));
+// 	});
+
+// DECIDE WAGER ORACLIZE FLIPPER
 coinFlipper
-	.then((instance) => { return instance.decideWager({ gasPrice: gasPrice, gas: gasLimit }) })
+	.then((instance) => { return instance.decideWager({ value: web3.toWei(1, 'ether'), gasPrice: gasPrice, gas: gasLimit }) })
 	.then((tx) => { 
 		console.log("Contract balance: " + Utils.balance(contractAddress));
-		console.log("Wager creator balance: " + Utils.balance(wagerCreator));
-		console.log("Wager accepter balance: " + Utils.balance(wagerAccepter));
+		// console.log("Wager creator balance: " + Utils.balance(wagerCreator));
+		// console.log("Wager accepter balance: " + Utils.balance(wagerAccepter));
 	});
+
+coinFlipper
+	.then((instance) => { return instance.result.call() })
+	.then((result) => { console.log("Oraclize result: " + result) });
 
 module.exports = (callback) => {}

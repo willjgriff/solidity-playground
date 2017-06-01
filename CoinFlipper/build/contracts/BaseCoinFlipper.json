@@ -1,12 +1,12 @@
 {
-  "contract_name": "CoinFlipper",
+  "contract_name": "BaseCoinFlipper",
   "abi": [
     {
       "constant": false,
       "inputs": [],
       "name": "decideWager",
       "outputs": [],
-      "payable": true,
+      "payable": false,
       "type": "function"
     },
     {
@@ -40,14 +40,7 @@
     }
   ],
   "unlinked_binary": "0x",
-  "networks": {
-    "1496139995359": {
-      "events": {},
-      "links": {},
-      "address": "0x733480aa7c26a35647bc56fac7d7e0c72eacbf6a",
-      "updated_at": 1496327583725
-    }
-  },
+  "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1496337667034
+  "updated_at": 1496327583479
 }
