@@ -1,5 +1,6 @@
 var Migrations = artifacts.require("./Migrations.sol");
 
-module.exports = function(deployer) {
-  deployer.deploy(Migrations, { gas: 500000, gasPrice: 20000000001});
+module.exports = (deployer) => {
+	// gas defined is rough estimate
+	deployer.deploy(Migrations, { gas: 200000 });
 };

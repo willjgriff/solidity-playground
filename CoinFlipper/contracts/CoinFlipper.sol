@@ -46,4 +46,9 @@ contract CoinFlipper {
 	}
 	
 	function decideWager() payable whenState(State.wagerAccepted);
+
+	function transferWinningFunds(address winner) internal {
+		winner.transfer(this.balance);
+		state = State.noWager;
+	}
 }
