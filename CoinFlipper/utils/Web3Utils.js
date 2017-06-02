@@ -1,11 +1,11 @@
 
 // Note we need to leave and reopen truffle console if we change this... 
-// require caches the js files not sure how to easily prevent this.
+// 'require' caches the js files not sure how to easily prevent this.
 
 // var utils = require("./utils/Web3Utils.js")
 
 var Web3 = require('web3')
-// Note we must change the web3 provider port when test chain changes.
+// Note we must change the web3 provider port when we change the testnet port.
 var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8544'));
 
 var acc = (index) => { return web3.eth.accounts[index] };
