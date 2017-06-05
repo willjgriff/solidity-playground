@@ -40,14 +40,7 @@
     }
   ],
   "unlinked_binary": "0x",
-  "networks": {
-    "1496139995359": {
-      "events": {},
-      "links": {},
-      "address": "0x733480aa7c26a35647bc56fac7d7e0c72eacbf6a",
-      "updated_at": 1496327583725
-    }
-  },
+  "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1496411714477
+  "updated_at": 1496660661507
 }

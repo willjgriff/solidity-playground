@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-// Abstract contract made by decideWager function.
+// Abstract contract requires decideWager function.
 // Should probably be a library of some sort. Composition over inheritance and all that!
 contract CoinFlipper {
 	
