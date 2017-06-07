@@ -7,7 +7,7 @@ var CoinFlipper = artifacts.require("./OracleDecidingCoinFlipper.sol")
 var coinFlipper = CoinFlipper.deployed()
 var contractAddress = "0x97f7514e3d5666ba4c41454ac6efc65eba9765cb"
 
-var creator = web3.eth.accounts[0]
+var creator = web3.eth.coinbase
 var wagerCreator = web3.eth.accounts[1]
 var wagerAccepter = web3.eth.accounts[2]
 const gasPrice = 20000000004
