@@ -2,6 +2,8 @@
 
 Contracts written in Solidity, using Truffle for deployment and testing. 
 
+<code>npm install</code> in the root dir to get web3 is required if wanting to use the 'ts.js' scripts.
+
 These are primarily for personal development. I have been using the decypher.tv tutorials for inspiration, implementing proposed contracts before watching their coresponding videos.
 
 Note: I have intentionally included build files incase I want to check the generated ABI's.
