@@ -2,11 +2,9 @@
 
 Contracts written in Solidity, using Truffle for deployment and testing. 
 
-<code>npm install</code> in the root dir to get web3 is required if wanting to use the 'ts.js' scripts.
-
 These are primarily for personal development. I have been using the decypher.tv tutorials for inspiration, implementing proposed contracts before watching their coresponding videos.
 
-Note: I have intentionally included build files incase I want to check the generated ABI's.
+Note: I have intentionally included build files incase I want to check the generated ABI's. <code>npm install</code> is required in the root dir to get web3 if wanting to execute the 'ts.js' scripts.
 
 <br><b>BasicEscrow</b> - Vary basic Escrow contract written to understand the basics of Unit Testing with Truffle and to start learning Solidity. The file ts.js can be commented/uncommented and executed with 'exec ts.js' from the truffle console to play with a deployed Escrow contract. There are basic Unit tests written in Solidity and JS.
 
