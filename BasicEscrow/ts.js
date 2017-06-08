@@ -3,7 +3,7 @@
 var Utils = require("./Utils/Web3Utils.js")
 var Escrow = artifacts.require("./Escrow.sol")
 var escrow = Escrow.deployed()
-var contractAddress = '0x60a234dd92c027c2552bb866964406018c357f33'
+var contractAddress = Escrow.address
 
 var arbiter = web3.eth.accounts[0]
 var sender = web3.eth.accounts[1]

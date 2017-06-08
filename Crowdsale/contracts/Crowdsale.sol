@@ -40,7 +40,7 @@ contract Crowdsale {
 	function contribute() payable beforeSaleEnd {
 		fundersContributions[msg.sender] += msg.value;
 		contributors.push(msg.sender);
-		Contributed(msg.sender, msg.value);
+		// Contributed(msg.sender, msg.value);
 	}
 	
 	function returnContribution() afterSaleEnd {

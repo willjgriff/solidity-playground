@@ -5,7 +5,7 @@ var Utils = require("./Utils/Web3Utils.js")
 // var CoinFlipper = artifacts.require("./BlockDecidingCoinFlipper.sol")
 var CoinFlipper = artifacts.require("./OracleDecidingCoinFlipper.sol")
 var coinFlipper = CoinFlipper.deployed()
-var contractAddress = "0x97f7514e3d5666ba4c41454ac6efc65eba9765cb"
+var contractAddress = CoinFlipper.address
 
 var creator = web3.eth.coinbase
 var wagerCreator = web3.eth.accounts[1]

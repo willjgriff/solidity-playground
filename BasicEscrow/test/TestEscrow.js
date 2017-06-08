@@ -7,15 +7,15 @@ var Web3Utils = require("./../Utils/Web3Utils.js");
 var Escrow = artifacts.require("./Escrow.sol");
 var BigNumber = require("bignumber.js");
 
-contract("Escrow", () => {
+contract("Escrow", (accounts) => {
 
 	var escrow;
 	const paymentValue = 1000;
 	const gasPrice = 20000000000;
 	const gasLimit = 500000;
-	var arbiterAddress = web3.eth.accounts[0];
-	var senderAddress = web3.eth.accounts[1];
-	var receiverAddress = web3.eth.accounts[2];
+	var arbiterAddress = accounts[0];
+	var senderAddress = accounts[1];
+	var receiverAddress = accounts[2];
 
 	// Recreate the contract before each test, closer to Unit testing this way.
 	beforeEach(() => {
@@ -73,13 +73,13 @@ contract("Escrow", () => {
 	})
 
 	describe("returnPayment", () => {
-		
-		it("returnPayment should throw when called from an address other than the arbiter", () => {
+
+		it("should throw when called from an address other than the arbiter", () => {
 			return Utils.assertThrows(() => {
 				return escrow.returnPayment({ from: senderAddress, gasPrice: gasPrice, gas: gasLimit } )}, gasLimit)
 		});
 
-		it("returnPayment should return contract balance to sender when called by arbiter", () => {
+		it("should return contract balance to sender when called by arbiter", () => {
 			var originalSenderBalance = web3.eth.getBalance(senderAddress);
 			var originalSenderBalanceMinusGas;
 
