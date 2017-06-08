@@ -7,6 +7,9 @@ contract Crowdsale {
 	uint public campaignEnd;
 	mapping(address => uint) public fundersContributions;
 	address[] public contributors;
+
+	// At indexed to test.
+	event Contributed(address indexed sender, uint amount);
 	
 	modifier onlyCreator() {
 	    if (msg.sender != creator) throw;
@@ -19,12 +22,12 @@ contract Crowdsale {
 	}
 	
 	modifier beforeSaleEnd() {
-	    if (campaignEnd > now) throw;
+	    if (now > campaignEnd) throw;
 	    _;
 	}
 	
 	modifier afterSaleEnd() {
-	    if (campaignEnd < now) throw;
+	    if (now < campaignEnd) throw;
 	    _;
 	}
 
@@ -37,6 +40,7 @@ contract Crowdsale {
 	function contribute() payable beforeSaleEnd {
 		fundersContributions[msg.sender] += msg.value;
 		contributors.push(msg.sender);
+		Contributed(msg.sender, msg.value);
 	}
 	
 	function returnContribution() afterSaleEnd {
@@ -49,7 +53,7 @@ contract Crowdsale {
 	}
 	
 	function deleteContract() onlyCreator {
-	    suicide(creator);
+	    selfdestruct(creator);
 	}
 	
 	function() {
