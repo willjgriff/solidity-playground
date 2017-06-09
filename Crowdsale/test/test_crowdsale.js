@@ -35,26 +35,5 @@ contract("Crowdsale", (accounts) => {
 					assert.equal(eventContributionAmount, expectedContributionAmount)
 				})
 		})
-
-		// Probably shouldn't test this in reality. Would be assumed this works.
-		it("doesn't call Contributed event with different index", () => {
-			var expectedSender = ""
-			var expectedContributionAmount = 0
-			var eventSender = ""
-			var eventContributionAmount = 0
-			
-			var event = crowdsale.Contributed({ sender: accounts[1] })
-			event.watch((error, response) => {
-				eventSender = response.args.sender
-				eventContributionAmount = response.args.amount
-			})
-
-			return crowdsale.contribute({ from: accounts[2], value: expectedContributionAmount })
-				.then(tx => {
-					event.stopWatching()
-					assert.equal(eventSender, expectedSender)
-					assert.equal(eventContributionAmount, expectedContributionAmount)
-				})
-		})
 	})
 })
