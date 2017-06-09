@@ -8,7 +8,6 @@ contract Crowdsale {
 	mapping(address => uint) public fundersContributions;
 	address[] public contributors;
 
-	// At indexed to test.
 	event Contributed(address indexed sender, uint amount);
 	
 	modifier onlyCreator() {
@@ -40,7 +39,7 @@ contract Crowdsale {
 	function contribute() payable beforeSaleEnd {
 		fundersContributions[msg.sender] += msg.value;
 		contributors.push(msg.sender);
-		// Contributed(msg.sender, msg.value);
+		Contributed(msg.sender, msg.value);
 	}
 	
 	function returnContribution() afterSaleEnd {

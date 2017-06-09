@@ -16,48 +16,44 @@ contract("Crowdsale", (accounts) => {
 
 	describe("contribute", () => {
 
-		// var event = null
-
-		// beforeEach(() => {
-		// 	event = crowdsale.Contributed({ sender: accounts[1] }, (error, response) => {
-
-		// 	})
-		// })
-
 		it("calls Contributed event with correct arguments", () => {
-
+			var expectedSender = accounts[1]
 			var expectedContributionAmount = web3.toWei(1, 'ether')
 			var eventSender
 			var eventContributionAmount
 
-			// var event = crowdsale.Contributed({ sender: accounts[1] })
-			// event.watch((error, response) => {
-			// 	event.stopWatching
-			// 	if (!error) {
-			// 		eventSender = response.args.sender
-			// 		eventContributionAmount = response.args.amount
-			// 	}
-			// })
+			var event = crowdsale.Contributed({ sender: expectedSender })
+			event.watch((error, response) => {
+				eventSender = response.args.sender
+				eventContributionAmount = response.args.amount
+			})
 
-			crowdsale.contribute({ from: accounts[1], value: expectedContributionAmount })
+			return crowdsale.contribute({ from: expectedSender, value: expectedContributionAmount })
 				.then(tx => {
-					
-					var event = crowdsale.Contributed({ sender: accounts[1] })
-					event.watch((error, response) => {
-						event.stopWatching()
-						if (!error) {
-							eventSender = response.args.sender
-							eventContributionAmount = response.args.amount
+					event.stopWatching()
+					assert.equal(eventSender, expectedSender)
+					assert.equal(eventContributionAmount, expectedContributionAmount)
+				})
+		})
 
-							assert.equal(eventSender, accounts[1])
-							assert.equal(eventContributionAmount, expectedContributionAmount)
+		// Probably shouldn't test this in reality. Would be assumed this works.
+		it("doesn't call Contributed event with different index", () => {
+			var expectedSender = ""
+			var expectedContributionAmount = 0
+			var eventSender = ""
+			var eventContributionAmount = 0
+			
+			var event = crowdsale.Contributed({ sender: accounts[1] })
+			event.watch((error, response) => {
+				eventSender = response.args.sender
+				eventContributionAmount = response.args.amount
+			})
 
-						}
-					})
-
-					// assert.equal(eventSender, accounts[1])
-					// assert.equal(eventContributionAmount, expectedContributionAmount)
-					// done()
+			return crowdsale.contribute({ from: accounts[2], value: expectedContributionAmount })
+				.then(tx => {
+					event.stopWatching()
+					assert.equal(eventSender, expectedSender)
+					assert.equal(eventContributionAmount, expectedContributionAmount)
 				})
 		})
 	})
