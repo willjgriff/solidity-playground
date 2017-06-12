@@ -11,8 +11,8 @@ contract Crowdsale {
 	event Contributed(address indexed sender, uint amount);
 	
 	modifier onlyCreator() {
-	    if (msg.sender != creator) throw;
-	    _;
+		if (msg.sender != creator) throw;
+		_;
 	}
 
 	modifier targetRaised() {
@@ -21,17 +21,17 @@ contract Crowdsale {
 	}
 	
 	modifier beforeSaleEnd() {
-	    if (now > campaignEnd) throw;
-	    _;
+		if (now > campaignEnd) throw;
+		_;
 	}
 	
 	modifier afterSaleEnd() {
-	    if (now < campaignEnd) throw;
-	    _;
+		if (now < campaignEnd) throw;
+		_;
 	}
 
 	function Crowdsale(uint _targetAmount, uint _campaignDuration) {
-	    creator = msg.sender;
+		creator = msg.sender;
 		targetAmount = _targetAmount;
 		campaignEnd = now + _campaignDuration;
 	}
@@ -43,16 +43,16 @@ contract Crowdsale {
 	}
 	
 	function returnContribution() afterSaleEnd {
-	    msg.sender.transfer(fundersContributions[msg.sender]);
-	    fundersContributions[msg.sender] = 0;
+		msg.sender.transfer(fundersContributions[msg.sender]);
+		fundersContributions[msg.sender] = 0;
 	}
 	
 	function finaliseContributions() afterSaleEnd targetRaised {
-	    creator.transfer(this.balance);
+		creator.transfer(this.balance);
 	}
 	
 	function deleteContract() onlyCreator {
-	    selfdestruct(creator);
+		selfdestruct(creator);
 	}
 	
 	function() {

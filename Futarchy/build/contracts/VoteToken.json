@@ -1,0 +1,186 @@
+{
+  "contract_name": "VoteToken",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "name": "ok",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "supply",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "name": "ok",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "who",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "name": "ok",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "name": "_allowance",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_numberOfVoteTokens",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b60405160208061024883398101604052515b60008054600160a060020a03191633600160a060020a031617905560018190555b505b6101f8806100506000396000f3006060604052361561005c5763ffffffff60e060020a600035041663095ea7b3811461005e57806318160ddd1461009157806323b872dd146100b357806370a08231146100ec578063a9059cbb1461005e578063dd62ed3e1461014d575bfe5b341561006657fe5b61007d600160a060020a0360043516602435610181565b604080519115158252519081900360200190f35b341561009957fe5b6100a161018a565b60408051918252519081900360200190f35b34156100bb57fe5b61007d600160a060020a0360043581169060243516604435610191565b604080519115158252519081900360200190f35b34156100f457fe5b6100a1600160a060020a036004351661019b565b60408051918252519081900360200190f35b341561006657fe5b61007d600160a060020a0360043516602435610181565b604080519115158252519081900360200190f35b341561015557fe5b6100a1600160a060020a0360043581169060243516610181565b60408051918252519081900360200190f35b60005b92915050565b6001545b90565b60005b9392505050565b600160a060020a0381166000908152600260205260409020545b919050565b60005b92915050565b60005b929150505600a165627a7a723058207addc19dcbd3881c2b0fd2ad51af2fab55374956323b17e9dcbd3310c1e4d4980029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1497263020808
+}
