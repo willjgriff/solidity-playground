@@ -1,7 +1,8 @@
 pragma solidity ^0.4.11;
 
 contract ERC20 {
-    function totalSupply() constant returns (uint supply);
+	// Removed in favour of auto created getter function
+    // function totalSupply() constant returns (uint supply);
     function balanceOf( address who ) constant returns (uint value);
     function allowance( address owner, address spender ) constant returns (uint _allowance);
 
