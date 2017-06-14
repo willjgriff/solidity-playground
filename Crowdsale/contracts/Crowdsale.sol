@@ -30,6 +30,7 @@ contract Crowdsale {
 		_;
 	}
 
+	// @param _campaignDuration The length of the campaign from now, in seconds.
 	function Crowdsale(uint _targetAmount, uint _campaignDuration) {
 		creator = msg.sender;
 		targetAmount = _targetAmount;
