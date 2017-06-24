@@ -60,7 +60,7 @@ futarchyVote.voteEndTime().then(time => console.log(new Date(time.toNumber() * 1
 // 	.then(votedInFavour => console.log("Winner: " + (votedInFavour ? "for" : "against")))
 
 // SPECIFY SUCCESS AND RETURN FUNDS
-// futarchyVote.testPeriodSuccess(false)
+// futarchyVote.testPeriodSuccess(true)
 // 	.then(tx => futarchyVote.claimReward({ from: web3.eth.accounts[0] }))
 // 	.then(tx => futarchyVote.claimReward({ from: web3.eth.accounts[1] }))
 // 	.then(tx => futarchyVote.claimReward({ from: web3.eth.accounts[2] }))
