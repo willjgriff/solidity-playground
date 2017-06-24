@@ -51,7 +51,7 @@ contract LockableVoteToken is ERC20 {
 	}
 	
 	modifier sendersAccountUnlocked() {
-	    if (votes.votersTokenLockTimes(msg.sender, 0) < now) throw;
+	    if (votes.voterEarliestTokenLockTime(msg.sender) < now) throw;
 	    _;
 	}
 	
@@ -83,7 +83,7 @@ contract LockableVoteToken is ERC20 {
 	{
 	    tokenHolders[msg.sender].balance -= value;
 	    
-	    if (votes.votersTokenLockTimes(to, 0) < now) {
+	    if (votes.voterEarliestTokenLockTime(to) < now) {
 	        tokenHolders[to].lockedBalance += value;
 	    } else {
 	        tokenHolders[to].balance += value;
