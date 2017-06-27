@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 
 import "./ERC20.sol";
-import "./Votes.sol";
+import "../vote/Votes.sol";
 
 // This ERC20 token isn't necessary for the Futarchy contract. It may even harm the balance in voting.
 // It is just for experimenting with ERC20 and communication between contracts.
@@ -60,11 +60,11 @@ contract LockableVoteToken is ERC20 {
 	    _;
 	}
 
-	function VoteToken(uint _totalSupply, Votes _votes) {
+	function VoteToken(uint _totalSupply, address votesAddress) {
 	    _totalSupply *= 10**uint(decimals);
 		tokenHolders[msg.sender].balance = _totalSupply;
 		totalSupply = _totalSupply;
-		votes = _votes;
+		votes = Votes(votesAddress);
 	}
 
 	function balanceOf(address who) constant returns (uint value) {

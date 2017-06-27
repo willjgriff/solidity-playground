@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import "./LockableVoteToken.sol";
+import "../token/LockableVoteToken.sol";
 
 contract FeeVote {
     
@@ -43,11 +43,11 @@ contract FeeVote {
         _;
     }
 
-	function FeeVote(LockableVoteToken _voteToken, string proposal, uint voteTime, uint revealTime) 
+	function FeeVote(address voteTokenAddress, string proposal, uint voteTime, uint revealTime) 
 	    payable
 	{
 	    // TODO: Check the msg.value is that specified by the algorithm params in the registry.
-		voteToken = _voteToken;
+		voteToken = LockableVoteToken(voteTokenAddress);
 		proposalDesc = proposal;
 		voteEndTime = now + voteTime;
 		revealEndTime = now + revealTime;
