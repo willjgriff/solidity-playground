@@ -1,0 +1,22 @@
+{
+  "contract_name": "VoteIdsLinkedList",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "nodeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "notHeadOrTail",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x60606040523415600b57fe5b5b60678060196000396000f300606060405263ffffffff60e060020a600035041663507d6f1681146020575bfe5b6029600435602b565b005b80151560375760006000fd5b5b505600a165627a7a723058209c886fe8b994ea1572dce5b40fb298d88bb0eb3a5d366da68e154bd259e9a2ea0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1498566030925
+}

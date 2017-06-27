@@ -1,0 +1,74 @@
+pragma solidity ^0.4.11;
+
+// Inspired by: https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
+// Unfortunately the lack of generics and lack of inheritance available in libraries prevents
+// abstraction of functionality for now. This is pretty much a copy of LockTimesLinkedList.sol
+library VoteIdsLinkedList {
+
+    uint constant HEAD_AND_TAIL = 0;
+
+    struct Node {
+        uint previousNode;
+        uint nextNode;
+    }
+    
+    struct LinkedList {
+        mapping (uint => Node) linkedList;
+    }
+
+    // Should be a modifier, libraries can't seem to have them yet.
+    function notHeadOrTail(uint nodeId) {
+        if (nodeId == HEAD_AND_TAIL) throw;
+    }
+    
+    function isNode(LinkedList storage self, uint nodeId) internal returns (bool) {
+        if (self.linkedList[nodeId].previousNode == HEAD_AND_TAIL 
+            && self.linkedList[nodeId].nextNode == HEAD_AND_TAIL 
+            && self.linkedList[HEAD_AND_TAIL].previousNode != nodeId) return false;
+        return true;
+    }
+
+    function getNode(LinkedList storage self, uint nodeId)
+        internal 
+        constant 
+        returns (Node)
+    {
+        // Modifiers don't seem to work in libs so for now this will suffice.
+        require(isNode(self, nodeId));
+
+        return self.linkedList[nodeId];
+    }
+
+    function insert(LinkedList storage self, uint existingPreviousNode, uint newNode) 
+        internal
+    {
+        // Modifiers don't seem to work in libs so for now this will suffice.
+        require(isNode(self, existingPreviousNode));
+        require(!isNode(self, newNode));
+
+        uint existingNextNode = self.linkedList[existingPreviousNode].nextNode;
+        stitch(self, existingPreviousNode, newNode);
+        stitch(self, newNode, existingNextNode);
+    }
+
+    function remove(LinkedList storage self, uint nodeId) 
+        internal 
+        returns (uint)
+    {
+        // Modifiers don't seem to work in libs so for now this will suffice.
+        notHeadOrTail(nodeId);
+        require(isNode(self, nodeId));
+
+        stitch(self, self.linkedList[nodeId].previousNode, self.linkedList[nodeId].nextNode);
+        delete self.linkedList[nodeId].previousNode;
+        delete self.linkedList[nodeId].nextNode;
+        return nodeId;
+    }
+
+    function stitch(LinkedList storage self, uint previousNode, uint newNode) 
+        internal  
+    {
+        self.linkedList[newNode].previousNode = previousNode;
+        self.linkedList[previousNode].nextNode = newNode;
+    }
+}

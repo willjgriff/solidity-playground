@@ -1,0 +1,22 @@
+{
+  "contract_name": "LockTimesLinkedList",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "nodeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "notHeadOrTail",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x60606040523415600b57fe5b5b60678060196000396000f300606060405263ffffffff60e060020a600035041663507d6f1681146020575bfe5b6029600435602b565b005b80151560375760006000fd5b5b505600a165627a7a72305820dcd8afa1192fa3e035bae1d57b457e26aed3a849990026a48ae4a4cf4e401e550029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1498566030924
+}
