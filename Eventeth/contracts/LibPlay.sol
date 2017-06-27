@@ -5,55 +5,55 @@ import "./VoteIdsLinkedList.sol";
 
 contract LibPlay {
     
+    uint constant HEAD_AND_TAIL = 0;
+    
 	using LockTimesLinkedList for LockTimesLinkedList.LinkedList;
 	using VoteIdsLinkedList for VoteIdsLinkedList.LinkedList;
 	
-	LockTimesLinkedList.LinkedList linkedList;
+	LockTimesLinkedList.LinkedList lockTimesLinkedList;
 
 	function getNode(uint ind) constant external returns (uint256[3]) {
-		var node = linkedList.getNode(ind);
+		var node = lockTimesLinkedList.getNode(ind);
 		return [node.previousNode, node.nodeData.voteIdsCount, node.nextNode];
 	}
 
 	modifier validAscendingInsertion(uint previousNodeId, uint newNode) {
-		LockTimesLinkedList.Node previousNode = linkedList.getNode(previousNodeId);
+		LockTimesLinkedList.Node previousNode = lockTimesLinkedList.getNode(previousNodeId);
 		if (previousNodeId > newNode || (previousNode.nextNode < newNode && previousNode.nextNode != 0)) throw;
 		_;
 	}
-
-	function insert(uint existingPreviousNode, uint newNode) 
-		validAscendingInsertion(existingPreviousNode, newNode)
-		external
-	{
-		linkedList.insert(existingPreviousNode, newNode);
-	}
-
-	function remove(uint index) external {
-		linkedList.remove(index);
-	}
 	
-	function isNode(uint nodeId) returns (bool) {
-		return linkedList.isNode(nodeId);
-	}
-	
-	function hasVoteAtTime(uint voteTime, uint voteId) constant returns (bool) {
-	    LockTimesLinkedList.NodeData storage lockTimeNodeData = linkedList.getNode(voteTime).nodeData;
+	function hasVoteAtTime(uint lockTime, uint voteId) constant returns (bool) {
+	    LockTimesLinkedList.NodeData storage lockTimeNodeData = lockTimesLinkedList.getNode(lockTime).nodeData;
 	    return lockTimeNodeData.voteIds.isNode(voteId);
 	}
 
-	function insertVote(uint latestPreviousTime, uint voteTime, uint voteId) {
-		if (!linkedList.isNode(voteTime)) {
-			linkedList.insert(latestPreviousTime, voteTime);
+	function insertVote(uint latestPreviousTime, uint lockTime, uint voteId) 
+		validAscendingInsertion(latestPreviousTime, lockTime)
+	{
+		if (!lockTimesLinkedList.isNode(lockTime)) {
+			lockTimesLinkedList.insert(latestPreviousTime, lockTime);
 		}
 		
-		LockTimesLinkedList.NodeData storage lockTimeNodeData = linkedList.getNode(voteTime).nodeData;
+		var lockTimeNodeData = lockTimesLinkedList.getNode(lockTime).nodeData;
 		lockTimeNodeData.voteIdsCount++;
-		VoteIdsLinkedList.LinkedList storage votesLinkedList = lockTimeNodeData.voteIds;
-		votesLinkedList.insert(0, voteId);
+		
+		var votesLinkedList = lockTimeNodeData.voteIds;
+		votesLinkedList.insert(HEAD_AND_TAIL, voteId);
 	}
 	
-	function removeVote(uint voteTime, uint voteId) {
+	function removeVote(uint lockTime, uint voteId) {
+	    var lockTimeNodeData = lockTimesLinkedList.getNode(lockTime).nodeData;
+	    lockTimeNodeData.voteIdsCount--;
+	    lockTimeNodeData.voteIds.remove(voteId);
 	    
+	    if (lockTimeNodeData.voteIdsCount == 0) {
+	        lockTimesLinkedList.remove(lockTime);
+	    }
+	}
+
+	function getEarliestUnrevealedVoteLockTime() constant returns (uint) {
+		return lockTimesLinkedList.getNode(HEAD_AND_TAIL).nextNode;
 	}
 	
 }

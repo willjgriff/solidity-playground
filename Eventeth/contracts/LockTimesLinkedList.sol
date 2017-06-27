@@ -7,6 +7,9 @@ import "./VoteIdsLinkedList.sol";
 // abstraction of functionality for now. This linkedList is copied into VoteIdsLinkedList
 // for use in this linkedList's Node. It is built in a way so that both this and the VoteIdsLinkedList
 // should be easily replaceable with a generic linked list in the future.
+
+// NOTE: The inner VoteIdsLinkedList can be removed in favour of an array but then we remove the capability to see which
+// voteIds a lockTime relate to.
 library LockTimesLinkedList {
     
     using VoteIdsLinkedList for VoteIdsLinkedList.LinkedList;
@@ -75,7 +78,6 @@ library LockTimesLinkedList {
         stitch(self, self.linkedList[nodeId].previousNode, self.linkedList[nodeId].nextNode);
         delete self.linkedList[nodeId].previousNode;
         delete self.linkedList[nodeId].nextNode;
-        delete self.linkedList[nodeId].nodeData;
         return nodeId;
     }
 
