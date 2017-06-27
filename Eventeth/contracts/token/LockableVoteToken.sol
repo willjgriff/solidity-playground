@@ -3,8 +3,9 @@ pragma solidity ^0.4.11;
 import "./ERC20.sol";
 import "../vote/Votes.sol";
 
-// This ERC20 token isn't necessary for the Futarchy contract. It may even harm the balance in voting.
-// It is just for experimenting with ERC20 and communication between contracts.
+// Basic ERC20 Token which locks transfers and stores incoming transfers until accounts are 
+// unlocked. Accounts are locked if votes.voterEarliestTokenLockTime(msg.sender) is past now.
+// In which case the account needs to reveal any unrevealed votes.
 contract LockableVoteToken is ERC20 {
     
     string public constant name = "Vote Token";
@@ -115,7 +116,7 @@ contract LockableVoteToken is ERC20 {
 		return true;
 	}
 	
-	function unlockBalance(address account)
+	function updateUnlockedBalance(address account)
 	    onlyVotesContract 
 	{
 	    tokenHolders[account].balance += tokenHolders[account].lockedBalance;
