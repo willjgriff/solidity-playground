@@ -1,5 +1,5 @@
 {
-  "contract_name": "ERC20",
+  "contract_name": "ERC20Token",
   "abi": [
     {
       "constant": false,
@@ -159,5 +159,5 @@
   "unlinked_binary": "0x",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1498652136089
+  "updated_at": 1498669002650
 }

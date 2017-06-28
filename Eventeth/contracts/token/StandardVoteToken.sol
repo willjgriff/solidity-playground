@@ -1,30 +1,24 @@
 pragma solidity ^0.4.11;
 
 import "./ERC20Token.sol";
-import "../vote/Votes.sol";
 
-// Basic ERC20 Token which locks transfers and stores incoming transfers until accounts are 
-// unlocked. Accounts are locked if votes.voterEarliestTokenLockTime(msg.sender) is past now.
-// In which case the account needs to reveal any unrevealed votes.
-contract LockableVoteToken is ERC20Token {
-    
-    string public constant name = "Vote Token";
+// This ERC20 token isn't necessary for the Futarchy contract. It may even harm the balance in voting.
+// It is just for experimenting with ERC20 and communication between contracts.
+contract StandardVoteToken is ERC20Token {
+
+	// Internal by default (like protected in java)
+	uint public totalSupply;
+	mapping(address => uint) balances;
+	mapping(address => mapping(address => uint)) allowances;
+
+	string public constant name = "Vote Token";
 	string public constant symbol = "VTE";
 	uint8 public constant decimals = 18;
-    
-    struct TokenHolder {
-        uint balance;
-        uint lockedBalance;
-    }
 
-	uint public totalSupply;
-	mapping(address => TokenHolder) tokenHolders;
-	mapping(address => mapping(address => uint)) allowances;
-	
-	Votes votes;
-
+	// Note we do not return false in functions that fail, but throw instead.
+	// I don't think there's consensus yet on which is better. Throw means we can use modifier's.
 	modifier hasBalance(address account, uint value) {
-		if (tokenHolders[account].balance < value) throw;
+		if (balances[account] < value) throw;
 		_;
 	}
 
@@ -34,7 +28,7 @@ contract LockableVoteToken is ERC20Token {
 	}
 
 	modifier wontOverflow(address account, uint value) {
-		if (tokenHolders[account].balance + value < tokenHolders[account].balance) throw;
+		if (balances[account] + value < balances[account]) throw;
 		_;
 	}
 
@@ -50,26 +44,14 @@ contract LockableVoteToken is ERC20Token {
 		if (value != 0 && allowances[msg.sender][spender] != 0) throw;
 		_;
 	}
-	
-	modifier sendersAccountUnlocked() {
-	    if (votes.voterEarliestTokenLockTime(msg.sender) < now) throw;
-	    _;
-	}
-	
-	modifier onlyVotesContract() {
-	    if (msg.sender != address(votes)) throw;
-	    _;
-	}
 
-	function VoteToken(uint _totalSupply, address votesAddress) {
-	    _totalSupply *= 10**uint(decimals);
-		tokenHolders[msg.sender].balance = _totalSupply;
+	function StandardVoteToken(uint _totalSupply) {
+		balances[msg.sender] = _totalSupply;
 		totalSupply = _totalSupply;
-		votes = Votes(votesAddress);
 	}
 
 	function balanceOf(address who) constant returns (uint value) {
-		return tokenHolders[who].balance;
+		return balances[who];
 	}
 
 	function allowance(address owner, address spender) constant returns (uint allowance) {
@@ -79,17 +61,10 @@ contract LockableVoteToken is ERC20Token {
 	function transfer(address to, uint value) 
 		hasBalance(msg.sender, value) 
 		wontOverflow(to, value)
-		sendersAccountUnlocked
-		returns (bool) 
+		returns (bool ok) 
 	{
-	    tokenHolders[msg.sender].balance -= value;
-	    
-	    if (votes.voterEarliestTokenLockTime(to) < now) {
-	        tokenHolders[to].lockedBalance += value;
-	    } else {
-	        tokenHolders[to].balance += value;
-	    }
-	    
+		balances[msg.sender] -= value;
+		balances[to] += value;
 		Transfer(msg.sender, to, value);
 		return true;
 	}
@@ -98,29 +73,21 @@ contract LockableVoteToken is ERC20Token {
 		hasBalance(from, value)
 		hasAllowance(from, msg.sender, value)
 		wontOverflow(to, value)
-		returns (bool)
+		returns (bool ok)
 	{
-		tokenHolders[from].balance -= value;
+		balances[from] -= value;
 		allowances[from][msg.sender] -= value;
-		tokenHolders[to].balance += value;
+		balances[to] += value;
 		Transfer(from, to, value);
 		return true;
 	}
 
 	function approve(address spender, uint value) 
 		allowanceSetToZero(spender, value)
-		returns (bool)
+		returns (bool ok)
 	{
 		allowances[msg.sender][spender] = value;
 		Approval(msg.sender, spender, value);
 		return true;
 	}
-	
-	function updateUnlockedBalance(address account)
-	    onlyVotesContract 
-	{
-	    tokenHolders[account].balance += tokenHolders[account].lockedBalance;
-	    tokenHolders[account].lockedBalance = 0;
-	}
-	
 }

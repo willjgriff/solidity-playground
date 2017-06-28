@@ -2,12 +2,13 @@ pragma solidity 0.4.11;
 
 import "./FeeVote.sol";
 import "../token/./LockableVoteToken.sol";
-import "./unrevealedLockTimes/LockTimesLinkedList.sol";
 import "./unrevealedLockTimes/UnrevealedLockTimes.sol";
 
 contract Votes {
 
-    using UnrevealedLockTimes for LockTimesLinkedList.LinkedList;
+    using UnrevealedLockTimes for UnrevealedLockTimes.LockTimes;
+    
+    // Used to return voteId;
     event VoteCreated(uint voteId, string voteDescription);
 
     struct Vote {
@@ -18,7 +19,7 @@ contract Votes {
     LockableVoteToken voteToken;
     uint idCount = 0;
     mapping(uint => Vote) public votes;
-    mapping(address => LockTimesLinkedList.LinkedList) unrevealedLockTimes;
+    mapping(address => UnrevealedLockTimes.LockTimes) unrevealedLockTimes;
 
     function setTokenAddress(address tokenAddress) {
         voteToken = LockableVoteToken(tokenAddress);

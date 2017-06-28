@@ -1,10 +1,8 @@
 pragma solidity ^0.4.11;
 
 // Inspired by: https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
-// Unfortunately the lack of generics and lack of inheritance available in libraries prevents
-// abstraction of functionality for now. This is pretty much a copy of LockTimesLinkedList.sol
-library VoteIdsLinkedList {
-
+library LinkedList {
+    
     uint constant HEAD_AND_TAIL = 0;
 
     struct Node {
@@ -31,7 +29,7 @@ library VoteIdsLinkedList {
     function getNode(LinkedList storage self, uint nodeId)
         internal 
         constant 
-        returns (Node)
+        returns (Node storage)
     {
         // Modifiers don't seem to work in libs so for now this will suffice.
         require(isNode(self, nodeId));
@@ -39,15 +37,15 @@ library VoteIdsLinkedList {
         return self.linkedList[nodeId];
     }
 
-    function insert(LinkedList storage self, uint existingPreviousNode, uint newNode) 
+    function insert(LinkedList storage self, uint previousNode, uint newNode) 
         internal
     {
         // Modifiers don't seem to work in libs so for now this will suffice.
-        require(isNode(self, existingPreviousNode));
+        require(isNode(self, previousNode));
         require(!isNode(self, newNode));
 
-        uint existingNextNode = self.linkedList[existingPreviousNode].nextNode;
-        stitch(self, existingPreviousNode, newNode);
+        uint existingNextNode = self.linkedList[previousNode].nextNode;
+        stitch(self, previousNode, newNode);
         stitch(self, newNode, existingNextNode);
     }
 
@@ -71,4 +69,5 @@ library VoteIdsLinkedList {
         self.linkedList[newNode].previousNode = previousNode;
         self.linkedList[previousNode].nextNode = newNode;
     }
+    
 }
