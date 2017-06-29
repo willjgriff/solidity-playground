@@ -1,8 +1,11 @@
 pragma solidity ^0.4.11;
 
 import "../token/./ERC20Token.sol";
+import "./VoteReward.sol";
 
 contract FeeVote {
+    
+    using VoteReward for VoteReward.GroupRewardAmounts;
 	
 	enum VoteDecision { voteFor, voteAgainst }
 	
@@ -19,6 +22,7 @@ contract FeeVote {
 	// VoteDecision, represented as uint(voteDecision), mapped to number of votes
 	mapping(uint => uint) public voteCounts;
 	mapping(address => Voter) voters;
+	VoteReward.GroupRewardAmounts groupRewardAmounts;
 	
 	modifier withinVotingPeriod() {
 		if (now > voteEndTime) throw;
@@ -93,43 +97,19 @@ contract FeeVote {
 	function claimReward() 
 		// afterRevealPeriod 
 	{
-		var votesFor = voteCounts[uint(VoteDecision.voteFor)];
-		var votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];
-		
-		// This math aint gonna check out, fractions etc... calcs can also be cached.
+	    uint voterDecision = uint(voters[msg.sender].voteDecision);
+	    uint voterVoteContribution = voters[msg.sender].voteTokens;
+	   	uint votesFor = voteCounts[uint(VoteDecision.voteFor)];
+		uint votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];
 		uint totalReward = voteToken.balanceOf(this);
-		uint rprop = 0;
-		uint pmin = winningVote() == VoteDecision.voteFor ? 
-			votesAgainst / votesFor : votesFor / votesAgainst;
-		uint d = 1;
-		uint scalingFactor = 1 - (pmin / (1 - pmin));
-
-		uint minorityReward = (totalReward - rprop) * pmin * d * scalingFactor;
-		uint majorityReward = totalReward - rprop - minorityReward;
-
-		Debug(minorityReward, majorityReward);
-
-		
-		if (voters[msg.sender].voteDecision == winningVote()) {
-			sendReward(winningVote(), majorityReward);
-		} else {
-			sendReward(losingVote(), minorityReward);
-		}
-	}
-
-	function sendReward(VoteDecision voteDecision, uint totalGroupReward) private {
-	    uint groupVoteContribution = voteCounts[uint(voteDecision)];
-	    uint individualVoteContribution = voters[msg.sender].voteTokens;
-		uint individualUserReward = (totalGroupReward * individualVoteContribution) / groupVoteContribution;
-		voteToken.transfer(msg.sender, individualUserReward);
-	}
-
-	function losingVote() constant private returns (VoteDecision) {
-		return winningVote() == VoteDecision.voteFor ? VoteDecision.voteAgainst : VoteDecision.voteFor;
+	    
+	    uint voterRewardAmount = groupRewardAmounts.getRewardAmount(voterDecision, voterVoteContribution, votesFor, votesAgainst, totalReward);
+	    
+        voteToken.transfer(msg.sender, voterRewardAmount);
 	}
 	
-		/** afterRevealPeriod*/
 	function winningVote() constant returns (VoteDecision)
+	/** afterRevealPeriod*/
 	{
 		var votesFor = voteCounts[uint(VoteDecision.voteFor)];
 		var votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];

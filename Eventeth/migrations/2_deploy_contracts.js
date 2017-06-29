@@ -1,6 +1,7 @@
 var UnrevealedLockTimesLib = artifacts.require("./UnrevealedLockTimes.sol");
 var Votes = artifacts.require("./Votes.sol")
 var VoteToken = artifacts.require("./LockableVoteToken.sol");
+var VoteReward = artifacts.require("./VoteReward.sol");
 
 // var UnrevealedTest = artifacts.require("./UnrevealedTest.sol");
 var FeeVote = artifacts.require("./FeeVote.sol");
@@ -20,6 +21,8 @@ module.exports = function(deployer) {
 	// deployer.deploy(UnrevealedTest)
 
 	// FOR TESTING FEE VOTE
+	deployer.deploy(VoteReward)
+	deployer.link(VoteReward, FeeVote)
 	deployer.deploy(StandardVoteToken, 1000)
 		.then(() => deployer.deploy(FeeVote, StandardVoteToken.address, "NALA", 30, 600))
 		.then(() => StandardVoteToken.at(StandardVoteToken.address).approve(FeeVote.address, 100))

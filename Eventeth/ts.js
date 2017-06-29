@@ -37,18 +37,21 @@ balance(1);
 // feeVote.winningVote().then(vote => console.log(vote == 0 ? "FOR" : "AGAINST"))
 
 // DEBUG EVENT
-var event = feeVote.Debug();
-event.watch((error, response) => {
-	if (!error) {
-		console.log("DEBUG: " + response.args.number + " " + response.args.numero)
-	} else {
-		console.log(error)
-	}
-	event.stopWatching()
-})
+// var event = feeVote.Debug();
+// event.watch((error, response) => {
+// 	if (!error) {
+// 		console.log("DEBUG: " + response.args.number + " " + response.args.numero)
+// 	} else {
+// 		console.log(error)
+// 	}
+// 	event.stopWatching()
+// })
 
-// CLAIM REWARDS
-feeVote.claimReward().then(tx => balance(0))
-feeVote.claimReward({ from: web3.eth.accounts[1] }).then(tx => balance(1))
+// // CLAIM REWARDS
+// feeVote.claimReward().then(tx => balance(0))
+// feeVote.claimReward({ from: web3.eth.accounts[1] }).then(tx => balance(1))
+
+// CHECK P VALUES
+
 
 module.exports = (callback) => {}
