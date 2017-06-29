@@ -4,30 +4,28 @@ pragma solidity ^0.4.11;
 library VoteReward {
     
     struct GroupRewardAmounts {
-        uint totalMinorityReward;
-        uint totalMajorityReward;
+        uint minorityGroupReward;
+        uint majorityGroupReward;
+        uint winningVote;
     }
 	
+	// This math aint gonna check out, fractions etc...
 	function getRewardAmount(GroupRewardAmounts storage self, uint voterDecision, uint voterVoteContribution, 
 	    uint totalVotesFor, uint totalVotesAgainst, uint totalReward) 
 	    returns (uint)
 	{
-	    // This math aint gonna check out, fractions etc... more can be be cached.
-	    uint winningVote = totalVotesFor > totalVotesAgainst ? 0 : 1;
-	    
-	    if (self.totalMinorityReward == 0 && self.totalMajorityReward == 0) {
-	        var (minorityReward, majorityReward) = getGroupRewards(totalVotesFor, totalVotesAgainst, totalReward);
-	    } else {
-	        minorityReward = self.totalMinorityReward;
-	        majorityReward = self.totalMajorityReward;
+	    if (self.minorityGroupReward == 0 && self.majorityGroupReward == 0) {
+	        (self.minorityGroupReward, self.majorityGroupReward) = findGroupRewards(totalVotesFor, totalVotesAgainst, totalReward);
+	        self.winningVote = totalVotesFor > totalVotesAgainst ? 0 : 1;
 	    }
 
-		uint voterGroupReward = voterDecision == winningVote ? majorityReward : minorityReward;
-		uint groupVoteContribution = voterDecision == winningVote ? totalVotesFor : totalVotesAgainst; 
-		return individualRewardAmount(groupVoteContribution, voterGroupReward, voterVoteContribution);
+		uint voterGroupReward = voterDecision == self.winningVote ? self.majorityGroupReward : self.minorityGroupReward;
+		uint voterGroupVoteContribution = voterDecision == self.winningVote ? totalVotesFor : totalVotesAgainst; 
+		uint voterReward = (voterGroupReward * voterVoteContribution) / voterGroupVoteContribution;
+		return voterReward;
 	}
 	
-	function getGroupRewards(uint totalVotesFor, uint totalVotesAgainst, uint totalReward) 
+	function findGroupRewards(uint totalVotesFor, uint totalVotesAgainst, uint totalReward) 
 	    constant 
 	    private
 	    returns (uint minorityReward, uint majorityReward) 
@@ -37,16 +35,16 @@ library VoteReward {
 	    // Unsure what discount factor is determined by, but it's either 0 or 1.
 		uint discountFactor = 1;
 		// The scaling factor will always be 0 since Solidity doesn't support fractional values yet. Not sure how to solve this.
-		var scalingFactor = getScalingFactor(totalVotesFor, totalVotesAgainst);
+		var scalingFactor = findScalingFactor(totalVotesFor, totalVotesAgainst);
 		// Tried to solve some of the fractional values problem by moving divisors and dividends around.
-		var (pMinDividend, pMinDivisor) = getPMinValues(totalVotesFor, totalVotesAgainst);
+		var (pMinDividend, pMinDivisor) = findPMinValues(totalVotesFor, totalVotesAgainst);
 		
 		// The minority reward will currently always be 0.
 	    minorityReward = (((totalReward - rprop) * pMinDividend) * discountFactor) / pMinDivisor * scalingFactor;
 		majorityReward = totalReward - rprop - minorityReward;
 	}
 	
-	function getScalingFactor(uint votesFor, uint votesAgainst) 
+	function findScalingFactor(uint votesFor, uint votesAgainst) 
 	    constant 
         private 
         returns (uint scalingFactor) 
@@ -59,21 +57,13 @@ library VoteReward {
 		scalingFactor = 1 - (pMax / (1 - pMin));
 	}
 	
-	function getPMinValues(uint votesFor, uint votesAgainst) 
+	function findPMinValues(uint votesFor, uint votesAgainst) 
 	    constant 
 	    private 
 	    returns (uint pMinDividend, uint pMinDivisor)
 	{
 	    pMinDividend = votesFor > votesAgainst ? votesAgainst : votesFor;
 	    pMinDivisor = votesFor > votesAgainst ? votesFor : votesAgainst;
-	}
-
-	function individualRewardAmount(uint groupVoteContribution, uint totalGroupReward, uint voterVoteContribution)
-	    constant
-	    private
-	    returns (uint)
-	{
-		return (totalGroupReward * voterVoteContribution) / groupVoteContribution;
 	}
 	
 }

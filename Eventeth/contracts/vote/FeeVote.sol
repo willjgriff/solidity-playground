@@ -109,7 +109,7 @@ contract FeeVote {
 	}
 	
 	function winningVote() constant returns (VoteDecision)
-	/** afterRevealPeriod*/
+	    //afterRevealPeriod
 	{
 		var votesFor = voteCounts[uint(VoteDecision.voteFor)];
 		var votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];
