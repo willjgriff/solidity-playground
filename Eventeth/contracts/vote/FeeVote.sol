@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 import "../token/./ERC20Token.sol";
 import "./VoteReward.sol";
 
-contract FeeVote {
+library FeeVote {
     
     using VoteReward for VoteReward.GroupRewardAmounts;
 	
@@ -16,109 +16,109 @@ contract FeeVote {
 		bool rewardClaimed;
 	}
 	
-	ERC20Token voteToken;
-	string public proposalDesc;
-	uint public voteEndTime;
-	uint public revealEndTime;
-	// VoteDecision, represented as uint(voteDecision), mapped to number of votes
-	mapping(uint => uint) public voteCounts;
-	mapping(address => Voter) voters;
-	VoteReward.GroupRewardAmounts groupRewardAmounts;
-	
-	modifier withinVotingPeriod() {
-		if (now > voteEndTime) throw;
-		_;
+	struct FeeVote {
+    	ERC20Token voteToken;
+    	string proposalDesc;
+    	uint voteEndTime;
+    	uint revealEndTime;
+    	// VoteDecision, represented as uint(voteDecision), mapped to number of votes
+    	mapping(uint => uint) voteCounts;
+    	mapping(address => Voter) voters;
+    	VoteReward.GroupRewardAmounts groupRewardAmounts;
 	}
 	
-	modifier withinRevealPeriod() {
-		if (now < voteEndTime || now > revealEndTime) throw;
-		_;
+	function withinVotingPeriod(FeeVote storage self) private returns (bool) {
+		if (now > self.voteEndTime) return false;
+		return true;
 	}
 	
-	modifier afterRevealPeriod() {
-		if (now < revealEndTime) throw;
-		_;
+	function withinRevealPeriod(FeeVote storage self) private returns (bool) {
+		if (now < self.voteEndTime || now > self.revealEndTime) return false;
+		return true;
 	}
 	
-	modifier validVoteHash(VoteDecision voteDecision, bytes32 salt) {
+	function afterRevealPeriod(FeeVote storage self) private returns (bool) {
+		if (now < self.revealEndTime) return false;
+		return true;
+	}
+	
+	function validVoteHash(FeeVote storage self, VoteDecision voteDecision, bytes32 salt) private returns (bool) {
 		bytes32 voteHash = getSealedVote(msg.sender, voteDecision, salt);
-		if (voters[msg.sender].sealedVoteHash != voteHash) throw;
-		_;
+		if (self.voters[msg.sender].sealedVoteHash != voteHash) return false;
+		return true;
 	}
 	
-	modifier rewardNotClaimed(address voter) {
-	    if (voters[voter].rewardClaimed == true) throw;
-	    _;
+	function rewardNotClaimed(FeeVote storage self, address voter) private returns (bool) {
+	    if (self.voters[voter].rewardClaimed == true) return false;
+	    return true;
 	}
 
 	/**
-	 * This will fail if the fee required has not been approved for this contract to spend
+	 * Note this will fail if the fee required has not been approved for this contract to spend
 	 */
-	function FeeVote(address voteTokenAddress, string proposal, uint voteTime,
-		uint revealTime) 
-		payable
+	function initialise(FeeVote storage self, ERC20Token voteToken, string proposal,
+	    uint voteTime, uint revealTime) 
+	    internal
 	{
-		voteToken = ERC20Token(voteTokenAddress);
-		proposalDesc = proposal;
-		voteEndTime = now + voteTime;
-		revealEndTime = now + revealTime;
-	}
-	
-	// This can be removed when FeeVote is converted to a library.
-	function payFee() {
-		// TODO: Check the msg.value is that specified by the algorithm params in the registry for the cost of the fee.
+		self.voteToken = voteToken;
+		self.proposalDesc = proposal;
+		self.voteEndTime = now + voteTime;
+		self.revealEndTime = now + revealTime;
+		
+	    // TODO: Check the registry / algorithm params for the cost of the fee.
 		var fee = 100;
-		voteToken.transferFrom(msg.sender, this, fee);
+		self.voteToken.transferFrom(msg.sender, this, fee);
 	}
 	
 	function getSealedVote(address voter, VoteDecision voteDecision, bytes32 salt) 
-		constant 
+		internal
+		constant
 		returns (bytes32)
 	{
 		return sha3(voter, voteDecision, salt);
 	}
 	
-	function castVote(bytes32 sealedVoteHash) 
-		// withinVotingPeriod
-	{
-		voters[msg.sender].sealedVoteHash = sealedVoteHash;
+	function castVote(FeeVote storage self, bytes32 sealedVoteHash) {
+	   // require(withinVotingPeriod(self));
+	    
+		self.voters[msg.sender].sealedVoteHash = sealedVoteHash;
 	}
 	
 	/**
 	 * @dev Reveal the vote from the sending account with the random salt. Note as well as
 	 * the modifier restrictions this can fail when the sender has already revealed their vote.
 	 */
-	function revealVote(VoteDecision voteDecision, bytes32 salt)
-		// withinRevealPeriod
-		validVoteHash(voteDecision, salt)
-	{
-		voters[msg.sender].sealedVoteHash = 0;
-		voteCounts[uint(voteDecision)] += voteToken.balanceOf(msg.sender);
-		voters[msg.sender].voteDecision = voteDecision;
-		voters[msg.sender].voteTokens = voteToken.balanceOf(msg.sender);
-	}
-	
-	function claimReward() 
-	    rewardNotClaimed(msg.sender)
-		// afterRevealPeriod 
-	{
-	    uint voterDecision = uint(voters[msg.sender].voteDecision);
-	    uint voterVoteContribution = voters[msg.sender].voteTokens;
-	   	uint votesFor = voteCounts[uint(VoteDecision.voteFor)];
-		uint votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];
-		uint totalReward = voteToken.balanceOf(this);
+	function revealVote(FeeVote storage self, VoteDecision voteDecision, bytes32 salt) internal {
+	   // require(withinRevealPeriod(self));
+	    require(validVoteHash(self, voteDecision, salt));
 	    
-	    uint voterRewardAmount = groupRewardAmounts.getRewardAmount(voterDecision, voterVoteContribution, votesFor, votesAgainst, totalReward);
-        voteToken.transfer(msg.sender, voterRewardAmount);
-        
-        voters[msg.sender].rewardClaimed = true;
+		self.voters[msg.sender].sealedVoteHash = 0;
+		self.voteCounts[uint(voteDecision)] += self.voteToken.balanceOf(msg.sender);
+		self.voters[msg.sender].voteDecision = voteDecision;
+		self.voters[msg.sender].voteTokens = self.voteToken.balanceOf(msg.sender);
 	}
 	
-	function winningVote() constant returns (VoteDecision)
-	   // afterRevealPeriod
-	{
-		var votesFor = voteCounts[uint(VoteDecision.voteFor)];
-		var votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];
+	function claimReward(FeeVote storage self) internal {
+	    require(rewardNotClaimed(self, msg.sender));
+	   // require(afterRevealPeriod(self));
+	    
+	    uint voterDecision = uint(self.voters[msg.sender].voteDecision);
+	    uint voterVoteContribution = self.voters[msg.sender].voteTokens;
+	   	uint votesFor = self.voteCounts[uint(VoteDecision.voteFor)];
+		uint votesAgainst = self.voteCounts[uint(VoteDecision.voteAgainst)];
+		uint totalReward = self.voteToken.balanceOf(this);
+	    
+	    uint voterRewardAmount = self.groupRewardAmounts.getRewardAmount(voterDecision, voterVoteContribution, votesFor, votesAgainst, totalReward);
+        self.voteToken.transfer(msg.sender, voterRewardAmount);
+        
+        self.voters[msg.sender].rewardClaimed = true;
+	}
+	
+	function winningVote(FeeVote storage self) constant internal returns (VoteDecision) {
+	   // require(afterRevealPeriod(self));
+	    
+		var votesFor = self.voteCounts[uint(VoteDecision.voteFor)];
+		var votesAgainst = self.voteCounts[uint(VoteDecision.voteAgainst)];
 		return votesFor > votesAgainst ? VoteDecision.voteFor : VoteDecision.voteAgainst;
 	}
 	

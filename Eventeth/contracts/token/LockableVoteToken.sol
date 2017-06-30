@@ -61,11 +61,11 @@ contract LockableVoteToken is ERC20Token {
 	    _;
 	}
 
-	function VoteToken(uint _totalSupply, address votesAddress) {
-	    _totalSupply *= 10**uint(decimals);
+	function LockableVoteToken(uint _totalSupply, Votes _votes) {
+	   // _totalSupply *= 10**uint(decimals);
 		tokenHolders[msg.sender].balance = _totalSupply;
 		totalSupply = _totalSupply;
-		votes = Votes(votesAddress);
+		votes = _votes;
 	}
 
 	function balanceOf(address who) constant returns (uint value) {
@@ -107,6 +107,9 @@ contract LockableVoteToken is ERC20Token {
 		return true;
 	}
 
+	/**
+	 * @dev Requires setting the allowance to 0 before it can be changed.
+	 */
 	function approve(address spender, uint value) 
 		allowanceSetToZero(spender, value)
 		returns (bool)

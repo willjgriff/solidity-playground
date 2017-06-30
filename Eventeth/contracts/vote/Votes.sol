@@ -4,34 +4,35 @@ import "./FeeVote.sol";
 import "../token/./LockableVoteToken.sol";
 import "./unrevealedLockTimes/UnrevealedLockTimes.sol";
 
+// DON'T FORGET TO UNCOMMENT THE REQUIRE STATEMENTS IN THE FEEVOTE LIBRARY.
+// ALSO: msg.sender won't be the sender when this is called from another contract. Rejigging will be required.
+// ALSO: still need to add a function to get the list of lock times.
+// ALSO: make total supply of LockableVoteTokens MASSIVE.
 contract Votes {
 
     using UnrevealedLockTimes for UnrevealedLockTimes.LockTimes;
+    using FeeVote for FeeVote.FeeVote;
     
     // Used to return voteId;
     event VoteCreated(uint voteId, string voteDescription);
-
-    struct Vote {
-        string voteDescription;
-        FeeVote feeVote;
-    }
     
     LockableVoteToken voteToken;
     uint idCount = 0;
-    mapping(uint => Vote) public votes;
+    mapping(uint => FeeVote.FeeVote) votes;
     mapping(address => UnrevealedLockTimes.LockTimes) unrevealedLockTimes;
 
     function setTokenAddress(address tokenAddress) {
         voteToken = LockableVoteToken(tokenAddress);
     }
     
-    function createVote(string voteDescription, uint voteTime, uint revealTime)
-        payable
-    {
-        FeeVote feeVote = new FeeVote(voteToken, voteDescription, voteTime, revealTime);
-        votes[idCount] = Vote(voteDescription, feeVote);
+    function createVote(string voteDescription, uint voteTime, uint revealTime) {
+        votes[idCount].initialise(voteToken, voteDescription, voteTime, revealTime);
         VoteCreated(idCount, voteDescription);
         idCount++;
+    }
+
+    function getSealedVote(address voter, FeeVote.VoteDecision voteDecision, bytes32 salt) constant returns (bytes32) {
+        return FeeVote.getSealedVote(voter, voteDecision, salt);
     }
     
     /**
@@ -42,15 +43,15 @@ contract Votes {
      * @param previousLockTime The latest lock time before the lock time at the vote with voteId.
      */
     function castVote(uint voteId, bytes32 sealedVoteHash, uint previousLockTime) {
-        votes[voteId].feeVote.castVote(sealedVoteHash);
-        uint voteEndTime = votes[voteId].feeVote.voteEndTime();
+        votes[voteId].castVote(sealedVoteHash);
+        uint voteEndTime = votes[voteId].voteEndTime;
         unrevealedLockTimes[msg.sender].insertVoteAtTime(previousLockTime, voteEndTime, voteId);
     }
     
     function revealVote(uint voteId, FeeVote.VoteDecision voteDecision, bytes32 salt) {
-        votes[voteId].feeVote.revealVote(voteDecision, salt);
+        votes[voteId].revealVote(voteDecision, salt);
 
-        uint voteEndTime = votes[voteId].feeVote.voteEndTime();
+        uint voteEndTime = votes[voteId].voteEndTime;
         unrevealedLockTimes[msg.sender].removeVoteAtTime(voteEndTime, voteId);
 
         if (unrevealedLockTimes[msg.sender].getEarliestUnrevealedVoteLockTime() < now) {
@@ -58,7 +59,7 @@ contract Votes {
         }
     }
     
-    function voterEarliestTokenLockTime(address voter) returns (uint) {
+    function voterEarliestTokenLockTime(address voter) constant returns (uint) {
         return unrevealedLockTimes[voter].getEarliestUnrevealedVoteLockTime();
     }
 }

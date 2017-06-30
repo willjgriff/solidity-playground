@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 import "./UnrevealedLockTimes.sol";
 
 // Contract for testing the UnrevealedLockTimes library. Serves no useful purpose.
-contract UnrevealedTest {
+contract UnrevealedLockTimesTest {
 
 	using UnrevealedLockTimes for UnrevealedLockTimes.LockTimes;
 
