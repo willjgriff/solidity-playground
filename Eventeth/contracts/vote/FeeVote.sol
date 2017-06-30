@@ -13,6 +13,7 @@ contract FeeVote {
 		bytes32 sealedVoteHash;
 		VoteDecision voteDecision;
 		uint voteTokens;
+		bool rewardClaimed;
 	}
 	
 	ERC20Token voteToken;
@@ -43,6 +44,11 @@ contract FeeVote {
 		bytes32 voteHash = getSealedVote(msg.sender, voteDecision, salt);
 		if (voters[msg.sender].sealedVoteHash != voteHash) throw;
 		_;
+	}
+	
+	modifier rewardNotClaimed(address voter) {
+	    if (voters[voter].rewardClaimed == true) throw;
+	    _;
 	}
 
 	/**
@@ -91,10 +97,9 @@ contract FeeVote {
 		voters[msg.sender].voteDecision = voteDecision;
 		voters[msg.sender].voteTokens = voteToken.balanceOf(msg.sender);
 	}
-
-	event Debug(uint number, uint numero);
 	
 	function claimReward() 
+	    rewardNotClaimed(msg.sender)
 		// afterRevealPeriod 
 	{
 	    uint voterDecision = uint(voters[msg.sender].voteDecision);
@@ -104,12 +109,13 @@ contract FeeVote {
 		uint totalReward = voteToken.balanceOf(this);
 	    
 	    uint voterRewardAmount = groupRewardAmounts.getRewardAmount(voterDecision, voterVoteContribution, votesFor, votesAgainst, totalReward);
-	    
         voteToken.transfer(msg.sender, voterRewardAmount);
+        
+        voters[msg.sender].rewardClaimed = true;
 	}
 	
 	function winningVote() constant returns (VoteDecision)
-	    //afterRevealPeriod
+	   // afterRevealPeriod
 	{
 		var votesFor = voteCounts[uint(VoteDecision.voteFor)];
 		var votesAgainst = voteCounts[uint(VoteDecision.voteAgainst)];

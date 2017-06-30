@@ -4,9 +4,12 @@ pragma solidity ^0.4.11;
 library VoteReward {
     
     struct GroupRewardAmounts {
+        // We could put more stuff in here, eg nearly all vars in the FeeVote. Less calcs would be needed in this library then.
         uint minorityGroupReward;
         uint majorityGroupReward;
         uint winningVote;
+        uint winningVoteContribution;
+        uint losingVoteContribution;
     }
 	
 	// This math aint gonna check out, fractions etc...
@@ -17,11 +20,14 @@ library VoteReward {
 	    if (self.minorityGroupReward == 0 && self.majorityGroupReward == 0) {
 	        (self.minorityGroupReward, self.majorityGroupReward) = findGroupRewards(totalVotesFor, totalVotesAgainst, totalReward);
 	        self.winningVote = totalVotesFor > totalVotesAgainst ? 0 : 1;
+            self.winningVoteContribution = totalVotesFor > totalVotesAgainst ? totalVotesFor : totalVotesAgainst;
+	        self.losingVoteContribution = totalVotesFor > totalVotesAgainst ? totalVotesFor : totalVotesAgainst;
 	    }
 
 		uint voterGroupReward = voterDecision == self.winningVote ? self.majorityGroupReward : self.minorityGroupReward;
-		uint voterGroupVoteContribution = voterDecision == self.winningVote ? totalVotesFor : totalVotesAgainst; 
+		uint voterGroupVoteContribution = voterDecision == self.winningVote ? self.winningVoteContribution : self.losingVoteContribution; 
 		uint voterReward = (voterGroupReward * voterVoteContribution) / voterGroupVoteContribution;
+		
 		return voterReward;
 	}
 	
@@ -34,8 +40,10 @@ library VoteReward {
 		uint rprop = 0;
 	    // Unsure what discount factor is determined by, but it's either 0 or 1.
 		uint discountFactor = 1;
-		// The scaling factor will always be 0 since Solidity doesn't support fractional values yet. Not sure how to solve this.
-		var scalingFactor = findScalingFactor(totalVotesFor, totalVotesAgainst);
+		// This currently returns a large value due to overflow error. For now the scaling factor will always be 0 
+		// since Solidity doesn't support fractional values yet. Not sure how to solve this.
+// 		var scalingFactor = findScalingFactor(totalVotesFor, totalVotesAgainst);
+        var scalingFactor = 0;
 		// Tried to solve some of the fractional values problem by moving divisors and dividends around.
 		var (pMinDividend, pMinDivisor) = findPMinValues(totalVotesFor, totalVotesAgainst);
 		
