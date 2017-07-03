@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 
 import "./ERC20Token.sol";
 import "../vote/Votes.sol";
+import "../vote/unrevealedLockTimes/LinkedList.sol";
 
 // Basic ERC20 Token which locks transfers and stores incoming transfers until accounts are 
 // unlocked. Accounts are locked if votes.voterEarliestTokenLockTime(msg.sender) is past now.
@@ -51,11 +52,11 @@ contract LockableVoteToken is ERC20Token {
 		_;
 	}
 	
-	modifier sendersAccountUnlocked() {
-	    if (votes.voterEarliestTokenLockTime(msg.sender) < now) throw;
+	modifier sendersAccountUnlocked(address sender) {
+	    if (!accountUnlocked(msg.sender)) throw;
 	    _;
 	}
-	
+
 	modifier onlyVotesContract() {
 	    if (msg.sender != address(votes)) throw;
 	    _;
@@ -72,39 +73,40 @@ contract LockableVoteToken is ERC20Token {
 		return tokenHolders[who].balance;
 	}
 
+	function totalBalanceOf(address who) constant returns (uint value) {
+		return tokenHolders[who].balance + tokenHolders[who].lockedBalance;
+	}
+
 	function allowance(address owner, address spender) constant returns (uint allowance) {
 		return allowances[owner][spender];
 	}
 
-	function transfer(address to, uint value) 
-		hasBalance(msg.sender, value) 
-		wontOverflow(to, value)
-		sendersAccountUnlocked
-		returns (bool) 
-	{
-	    tokenHolders[msg.sender].balance -= value;
-	    
-	    if (votes.voterEarliestTokenLockTime(to) < now) {
-	        tokenHolders[to].lockedBalance += value;
-	    } else {
-	        tokenHolders[to].balance += value;
-	    }
-	    
-		Transfer(msg.sender, to, value);
+	function transfer(address to, uint value) returns (bool) {
+        moveFunds(msg.sender, to, value);
 		return true;
 	}
 
 	function transferFrom(address from, address to, uint value)
-		hasBalance(from, value)
 		hasAllowance(from, msg.sender, value)
-		wontOverflow(to, value)
 		returns (bool)
 	{
-		tokenHolders[from].balance -= value;
-		allowances[from][msg.sender] -= value;
-		tokenHolders[to].balance += value;
-		Transfer(from, to, value);
+	    allowances[from][msg.sender] -= value;
+	    moveFunds(from, to, value);
 		return true;
+	}
+
+	function moveFunds(address from, address to, uint value) private
+	    hasBalance(from, value) 
+	    wontOverflow(to, value)
+	    sendersAccountUnlocked(from)
+	{
+		tokenHolders[from].balance -= value;
+	    if (accountUnlocked(to)) {
+	        tokenHolders[to].balance += value;
+	    } else {
+	        tokenHolders[to].lockedBalance += value;
+	    }
+	    Transfer(from, to, value);
 	}
 
 	/**
@@ -124,6 +126,11 @@ contract LockableVoteToken is ERC20Token {
 	{
 	    tokenHolders[account].balance += tokenHolders[account].lockedBalance;
 	    tokenHolders[account].lockedBalance = 0;
+	}
+	
+	function accountUnlocked(address account) private returns (bool) {
+	    if (votes.voterEarliestTokenLockTime(account) != LinkedList.headTailIndex() && votes.voterEarliestTokenLockTime(account) < now) return false;
+	    return true;
 	}
 	
 }

@@ -7,8 +7,6 @@ import "./LinkedList.sol";
 // NOTE: The inner votesIds LinkedList is useful to see which voteIds a lockTime relate to.
 library UnrevealedLockTimes {
     
-    uint constant HEAD_AND_TAIL = 0;
-    
 	using LinkedList for LinkedList.LinkedList;
     
     struct LockTimes {
@@ -21,7 +19,7 @@ library UnrevealedLockTimes {
         uint voteIdsCount;
     }
 	
-	// Purely for testing purposes, can be removed when confirmed to work.
+	// TODO: Purely for testing purposes, can be removed when confirmed to work.
 	function getNode(UnrevealedLockTimes.LockTimes storage self, uint lockTime) 
 	    constant
 	    returns (uint256[3])
@@ -31,8 +29,8 @@ library UnrevealedLockTimes {
 		return [node.previousNode, nodeData.voteIdsCount, node.nextNode];
 	}
 
-	function validAscendingInsertion(UnrevealedLockTimes.LockTimes storage self,
-	    uint previousNodeId, uint newNode)
+	function validAscendingInsertion(UnrevealedLockTimes.LockTimes storage self, uint previousNodeId, uint newNode)
+	    internal
 	    returns (bool)
 	{
 		LinkedList.Node previousNode = self.lockTimesLinkedList.getNode(previousNodeId);
@@ -42,6 +40,7 @@ library UnrevealedLockTimes {
 
 	function insertVoteAtTime(UnrevealedLockTimes.LockTimes storage self, 
 	    uint latestPreviousTime, uint lockTime, uint voteId) 
+	    internal
 	{
 	    require(validAscendingInsertion(self, latestPreviousTime, lockTime));
 	    
@@ -53,10 +52,12 @@ library UnrevealedLockTimes {
 		lockTimeNodeData.voteIdsCount++;
 		
 		var votesLinkedList = lockTimeNodeData.voteIds;
-		votesLinkedList.insert(HEAD_AND_TAIL, voteId);
+		votesLinkedList.insert(LinkedList.headTailIndex(), voteId);
 	}
 	
-	function removeVoteAtTime(UnrevealedLockTimes.LockTimes storage self, uint lockTime, uint voteId) {
+	function removeVoteAtTime(UnrevealedLockTimes.LockTimes storage self, uint lockTime, uint voteId)
+	    internal
+	{
 	    require(self.lockTimesLinkedList.isNode(lockTime));
 	    
 	    var lockTimeNodeData = self.lockTimesNodeData[lockTime];
@@ -68,8 +69,25 @@ library UnrevealedLockTimes {
 	    }
 	}
 
-	function getEarliestUnrevealedVoteLockTime(UnrevealedLockTimes.LockTimes storage self) constant returns (uint) {
-		return self.lockTimesLinkedList.getNode(HEAD_AND_TAIL).nextNode;
+	function getEarliestUnrevealedVoteLockTime(UnrevealedLockTimes.LockTimes storage self) 
+	    internal
+	    constant 
+	    returns (uint)
+	{
+		return self.lockTimesLinkedList.getNode(LinkedList.headTailIndex()).nextNode;
+	}
+	
+	function getLatestPreviousLockTimeForTime(UnrevealedLockTimes.LockTimes storage self, uint lockTime) 
+	    internal
+	    constant 
+	    returns (uint)
+	{
+	    uint currentLockTime = LinkedList.headTailIndex();
+	    while (self.lockTimesLinkedList.getNode(currentLockTime).nextNode != 0
+	        && self.lockTimesLinkedList.getNode(currentLockTime).nextNode < lockTime) {
+	        currentLockTime = self.lockTimesLinkedList.getNode(currentLockTime).nextNode;
+	    }
+	    return currentLockTime;
 	}
 	
 }

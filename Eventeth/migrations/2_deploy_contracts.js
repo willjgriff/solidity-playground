@@ -2,7 +2,9 @@ var Votes = artifacts.require("./Votes.sol")
 var VoteToken = artifacts.require("./LockableVoteToken.sol")
 
 var UnrevealedLockTimesLib = artifacts.require("./UnrevealedLockTimes.sol")
+var LinkedListLib = artifacts.require("./LinkedList.sol");
 var FeeVoteLib = artifacts.require("./FeeVote.sol")
+var VoteRewardLib = artifacts.require("./VoteReward.sol");
 
 // FOR TESTING CONTRACTS, AUTOMATED OR MANUAL
 // var UnrevealedLockTimesTest = artifacts.require("./UnrevealedLockTimesTest.sol")
@@ -12,10 +14,20 @@ var FeeVoteLib = artifacts.require("./FeeVote.sol")
 
 module.exports = function(deployer) {
 	// FOR FULL DEPLOYMENT
+	deployer.deploy(LinkedListLib)
+	deployer.link(LinkedListLib, UnrevealedLockTimesLib)
+	deployer.link(LinkedListLib, VoteToken)
+	deployer.link(LinkedListLib, Votes)
+
 	deployer.deploy(FeeVoteLib)
-	deployer.deploy(UnrevealedLockTimesLib)
 	deployer.link(FeeVoteLib, Votes)
+
+	deployer.deploy(UnrevealedLockTimesLib)
 	deployer.link(UnrevealedLockTimesLib, Votes)
+
+	deployer.deploy(VoteRewardLib)
+	deployer.link(VoteRewardLib, Votes)
+
 	deployer.deploy(Votes)
 		.then(() => deployer.deploy(VoteToken, 2000, Votes.address))
 		.then(() => Votes.deployed())

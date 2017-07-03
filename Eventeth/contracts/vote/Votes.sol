@@ -5,7 +5,7 @@ import "../token/./LockableVoteToken.sol";
 import "./unrevealedLockTimes/UnrevealedLockTimes.sol";
 
 // DON'T FORGET TO UNCOMMENT THE REQUIRE STATEMENTS IN THE FEEVOTE LIBRARY.
-// ALSO: msg.sender won't be the sender when this is called from another contract. Rejigging will be required.
+// ALSO: msg.sender won't be the sender when this is called from another contract. Rejigging will be required or maybe this will become a library...
 // ALSO: still need to add a function to get the list of lock times.
 // ALSO: make total supply of LockableVoteTokens MASSIVE.
 contract Votes {
@@ -17,7 +17,8 @@ contract Votes {
     event VoteCreated(uint voteId, string voteDescription);
     
     LockableVoteToken voteToken;
-    uint idCount = 0;
+    // This starts from 1 not 0 because it will be an index in a LinkedList with head and tail that is 0;
+    uint idCount = 1;
     mapping(uint => FeeVote.FeeVote) votes;
     mapping(address => UnrevealedLockTimes.LockTimes) unrevealedLockTimes;
 
@@ -59,7 +60,26 @@ contract Votes {
         }
     }
     
+    function claimReward(uint voteId) {
+        votes[voteId].claimReward();
+    }
+
+    // // TODO: For testing, delete this
+    function blockTimeNow() constant returns (uint) {
+        return now;
+    }
+    
     function voterEarliestTokenLockTime(address voter) constant returns (uint) {
         return unrevealedLockTimes[voter].getEarliestUnrevealedVoteLockTime();
+    }
+    
+    function latestPreviousLockTime(address voter, uint voteId) constant returns (uint) {
+        uint tokenLockTime = votes[voteId].voteEndTime;
+        return unrevealedLockTimes[voter].getLatestPreviousLockTimeForTime(tokenLockTime);
+    }
+
+    // TODO: DELETE THIS
+    function getUnrevealedNode(address voter, uint lockTime) constant returns (uint256[3]) {
+        return unrevealedLockTimes[voter].getNode(lockTime);
     }
 }

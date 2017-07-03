@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 // Inspired by: https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
 library LinkedList {
     
-    uint constant HEAD_AND_TAIL = 0;
+    uint public constant HEAD_AND_TAIL = 0;
 
     struct Node {
         uint previousNode;
@@ -24,6 +24,10 @@ library LinkedList {
             && self.linkedList[nodeId].nextNode == HEAD_AND_TAIL 
             && self.linkedList[HEAD_AND_TAIL].previousNode != nodeId) return false;
         return true;
+    }
+    
+    function headTailIndex() constant returns (uint) {
+        return HEAD_AND_TAIL;
     }
 
     function getNode(LinkedList storage self, uint nodeId)
@@ -64,7 +68,7 @@ library LinkedList {
     }
 
     function stitch(LinkedList storage self, uint previousNode, uint newNode) 
-        internal  
+        private  
     {
         self.linkedList[newNode].previousNode = previousNode;
         self.linkedList[previousNode].nextNode = newNode;
