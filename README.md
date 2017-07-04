@@ -2,7 +2,7 @@
 
 Contracts written in Solidity, using Truffle for deployment and testing. 
 
-These are primarily for personal development. I have been using the decypher.tv tutorials for inspiration, implementing proposed contracts before watching their coresponding videos.
+These are primarily for personal development, in order of when I wrote them. I started by using the decypher.tv tutorials for inspiration, implementing proposed contracts before watching their coresponding videos. I finally moved onto building larger sets of contracts.
 
 Note: I have intentionally included build files incase I want to check the generated ABI's. <code>npm install</code> is required in the root dir to get web3 if wanting to execute the 'ts.js' scripts.
 
@@ -18,4 +18,4 @@ The Web3Utils is copied from the BasicEscrow project and updated to be a bit mor
 
 <br><b>Futarchy (not really Futarchy but similar idea, maybe SchellingVote would be a better name)</b> - Futarchy Vote contract which accepts ERC20 VoteTokens representing votes for or against a decision. The winning vote is put into practice and after a period of time the success of the decision is registered with the contract. People who previously contributed VoteToken's to the correct outcome can claim them back plus VoteTokens contributed to vote for the incorrect outcome proportional to their contribution. There is a 'ts.js' which can be used to test. To test, once contracts are deployed, start by transferring VoteTokens to a couple of accounts, then submitting votes, then if using testrpc a new block needs to be mined to update the 'now' constant in the contract (make a tx or something), then the test period outcome can be registered and winning participants can retrieve their VoteTokens.
 
-<br><b>Eventeth</b> - Currently a variation of a stake weighted voting contract inspired by: https://blog.colony.io/towards-better-ethereum-voting-protocols-7e54cb5a0119 There are vote and reveal periods and a claim period for claiming any reward for voting. It includes a basic LinkedList and use of libraries. 
+<br><b>Eventeth</b> - Multi-period set of financially incentivised voting contracts with vote-reveal-claim periods. Including an ERC20 lockable vote token which is locked during the reveal period for accounts that have voted until the account reveals their vote. Multiple votes with the same end times can be created and votes cast will lock the vote token accordingly for those accounts. It includes a basic LinkedList and use of libraries. This is a variation of a voting contract inspired by: https://blog.colony.io/towards-better-ethereum-voting-protocols-7e54cb5a0119
