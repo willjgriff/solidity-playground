@@ -25,6 +25,7 @@ library FeeVote {
     	mapping(uint => uint) voteCounts;
     	mapping(address => Voter) voters;
     	VoteReward.GroupRewardAmounts groupRewardAmounts;
+    	uint feePayed;
 	}
 	
 	function withinVotingPeriod(FeeVote storage self) private returns (bool) {
@@ -65,9 +66,9 @@ library FeeVote {
 		self.voteEndTime = now + voteTime;
 		self.revealEndTime = now + revealTime;
 		
-	    // TODO: Check the registry / algorithm params for the cost of the fee.
-		var fee = 100;
-		self.voteToken.transferFrom(msg.sender, this, fee);
+	    // TODO: Check the registry / algorithm params for the cost of the fee. The fee should be 'allowed' by the sender.
+		self.feePayed = 100;
+		self.voteToken.transferFrom(msg.sender, this, self.feePayed);
 	}
 	
 	function getSealedVote(address voter, VoteDecision voteDecision, bytes32 salt) 
@@ -106,7 +107,7 @@ library FeeVote {
 	    uint voterVoteContribution = self.voters[msg.sender].voteTokens;
 	   	uint votesFor = self.voteCounts[uint(VoteDecision.voteFor)];
 		uint votesAgainst = self.voteCounts[uint(VoteDecision.voteAgainst)];
-		uint totalReward = self.voteToken.balanceOf(this);
+		uint totalReward = self.feePayed;
 	    
 	    uint voterRewardAmount = self.groupRewardAmounts.getRewardAmount(voterDecision, voterVoteContribution, votesFor, votesAgainst, totalReward);
         self.voteToken.transfer(msg.sender, voterRewardAmount);

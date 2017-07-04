@@ -19,8 +19,8 @@ contract LockableVoteToken is ERC20Token {
     }
 
 	uint public totalSupply;
-	mapping(address => TokenHolder) tokenHolders;
-	mapping(address => mapping(address => uint)) allowances;
+	mapping(address => TokenHolder) internal tokenHolders;
+	mapping(address => mapping(address => uint)) internal allowances;
 	
 	Votes votes;
 
@@ -62,31 +62,32 @@ contract LockableVoteToken is ERC20Token {
 	    _;
 	}
 
-	function LockableVoteToken(uint _totalSupply, Votes _votes) {
+	function LockableVoteToken(uint _totalSupply, Votes _votes) public {
 	   // _totalSupply *= 10**uint(decimals);
 		tokenHolders[msg.sender].balance = _totalSupply;
 		totalSupply = _totalSupply;
 		votes = _votes;
 	}
 
-	function balanceOf(address who) constant returns (uint value) {
+	function balanceOf(address who) public constant returns (uint value) {
 		return tokenHolders[who].balance;
 	}
 
-	function totalBalanceOf(address who) constant returns (uint value) {
+	function totalBalanceOf(address who) public constant returns (uint value) {
 		return tokenHolders[who].balance + tokenHolders[who].lockedBalance;
 	}
 
-	function allowance(address owner, address spender) constant returns (uint allowance) {
+	function allowance(address owner, address spender) public constant returns (uint allowance) {
 		return allowances[owner][spender];
 	}
 
-	function transfer(address to, uint value) returns (bool) {
+	function transfer(address to, uint value) public returns (bool) {
         moveFunds(msg.sender, to, value);
 		return true;
 	}
 
 	function transferFrom(address from, address to, uint value)
+	    public
 		hasAllowance(from, msg.sender, value)
 		returns (bool)
 	{
@@ -95,7 +96,8 @@ contract LockableVoteToken is ERC20Token {
 		return true;
 	}
 
-	function moveFunds(address from, address to, uint value) private
+	function moveFunds(address from, address to, uint value) 
+	    private
 	    hasBalance(from, value) 
 	    wontOverflow(to, value)
 	    sendersAccountUnlocked(from)
@@ -113,6 +115,7 @@ contract LockableVoteToken is ERC20Token {
 	 * @dev Requires setting the allowance to 0 before it can be changed.
 	 */
 	function approve(address spender, uint value) 
+	    public
 		allowanceSetToZero(spender, value)
 		returns (bool)
 	{
@@ -122,13 +125,17 @@ contract LockableVoteToken is ERC20Token {
 	}
 	
 	function updateUnlockedBalance(address account)
+	    public
 	    onlyVotesContract 
 	{
 	    tokenHolders[account].balance += tokenHolders[account].lockedBalance;
 	    tokenHolders[account].lockedBalance = 0;
 	}
 	
-	function accountUnlocked(address account) private returns (bool) {
+	function accountUnlocked(address account) 
+	    private 
+	    returns (bool) 
+    {
 	    if (votes.voterEarliestTokenLockTime(account) != LinkedList.headTailIndex() && votes.voterEarliestTokenLockTime(account) < now) return false;
 	    return true;
 	}

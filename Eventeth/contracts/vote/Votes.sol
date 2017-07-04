@@ -1,12 +1,12 @@
-pragma solidity 0.4.11;
+pragma solidity ^0.4.11;
 
 import "./FeeVote.sol";
 import "../token/./LockableVoteToken.sol";
 import "./unrevealedLockTimes/UnrevealedLockTimes.sol";
 
-// DON'T FORGET TO UNCOMMENT THE REQUIRE STATEMENTS IN THE FEEVOTE LIBRARY.
-// ALSO: msg.sender won't be the sender when this is called from another contract. Rejigging will be required or maybe this will become a library...
-// ALSO: still need to add a function to get the list of lock times.
+// DON'T FORGET TO UNCOMMENT THE TIMED REQUIRE STATEMENTS IN THE FEEVOTE LIBRARY.
+// ALSO: This should become a library if exclusively used from another contract. 
+// Otherwise msg.sender may not be the sender when this is called from another contract.
 // ALSO: make total supply of LockableVoteTokens MASSIVE.
 contract Votes {
 
@@ -14,13 +14,13 @@ contract Votes {
     using FeeVote for FeeVote.FeeVote;
     
     // Used to return voteId;
-    event VoteCreated(uint voteId, string voteDescription);
+    event LogVoteCreated(uint voteId, string voteDescription);
     
-    LockableVoteToken voteToken;
+    LockableVoteToken private voteToken;
     // This starts from 1 not 0 because it will be an index in a LinkedList with head and tail that is 0;
-    uint idCount = 1;
-    mapping(uint => FeeVote.FeeVote) votes;
-    mapping(address => UnrevealedLockTimes.LockTimes) unrevealedLockTimes;
+    uint public idCount = 1;
+    mapping(uint => FeeVote.FeeVote) private votes;
+    mapping(address => UnrevealedLockTimes.LockTimes) private unrevealedLockTimes;
 
     function setTokenAddress(address tokenAddress) {
         voteToken = LockableVoteToken(tokenAddress);
@@ -28,7 +28,7 @@ contract Votes {
     
     function createVote(string voteDescription, uint voteTime, uint revealTime) {
         votes[idCount].initialise(voteToken, voteDescription, voteTime, revealTime);
-        VoteCreated(idCount, voteDescription);
+        LogVoteCreated(idCount, voteDescription);
         idCount++;
     }
 
@@ -63,11 +63,6 @@ contract Votes {
     function claimReward(uint voteId) {
         votes[voteId].claimReward();
     }
-
-    // // TODO: For testing, delete this
-    function blockTimeNow() constant returns (uint) {
-        return now;
-    }
     
     function voterEarliestTokenLockTime(address voter) constant returns (uint) {
         return unrevealedLockTimes[voter].getEarliestUnrevealedVoteLockTime();
@@ -76,10 +71,5 @@ contract Votes {
     function latestPreviousLockTime(address voter, uint voteId) constant returns (uint) {
         uint tokenLockTime = votes[voteId].voteEndTime;
         return unrevealedLockTimes[voter].getLatestPreviousLockTimeForTime(tokenLockTime);
-    }
-
-    // TODO: DELETE THIS
-    function getUnrevealedNode(address voter, uint lockTime) constant returns (uint256[3]) {
-        return unrevealedLockTimes[voter].getNode(lockTime);
     }
 }
