@@ -8,15 +8,15 @@ import "../vote/unrevealedLockTimes/LinkedList.sol";
 // unlocked. Accounts are locked if votes.voterEarliestTokenLockTime(msg.sender) is past now.
 // In which case the account needs to reveal any unrevealed votes.
 contract LockableVoteToken is ERC20Token {
-    
-    string public constant name = "Vote Token";
+	
+	string public constant name = "Vote Token";
 	string public constant symbol = "VTE";
 	uint8 public constant decimals = 18;
-    
-    struct TokenHolder {
-        uint balance;
-        uint lockedBalance;
-    }
+	
+	struct TokenHolder {
+		uint balance;
+		uint lockedBalance;
+	}
 
 	uint public totalSupply;
 	mapping(address => TokenHolder) internal tokenHolders;
@@ -53,13 +53,13 @@ contract LockableVoteToken is ERC20Token {
 	}
 	
 	modifier sendersAccountUnlocked(address sender) {
-	    if (!accountUnlocked(msg.sender)) throw;
-	    _;
+		if (!accountUnlocked(msg.sender)) throw;
+		_;
 	}
 
 	modifier onlyVotesContract() {
-	    if (msg.sender != address(votes)) throw;
-	    _;
+		if (msg.sender != address(votes)) throw;
+		_;
 	}
 
 	function LockableVoteToken(uint _totalSupply, Votes _votes) public {
@@ -82,40 +82,40 @@ contract LockableVoteToken is ERC20Token {
 	}
 
 	function transfer(address to, uint value) public returns (bool) {
-        moveFunds(msg.sender, to, value);
+		moveFunds(msg.sender, to, value);
 		return true;
 	}
 
 	function transferFrom(address from, address to, uint value)
-	    public
+		public
 		hasAllowance(from, msg.sender, value)
 		returns (bool)
 	{
-	    allowances[from][msg.sender] -= value;
-	    moveFunds(from, to, value);
+		allowances[from][msg.sender] -= value;
+		moveFunds(from, to, value);
 		return true;
 	}
 
 	function moveFunds(address from, address to, uint value) 
-	    private
-	    hasBalance(from, value) 
-	    wontOverflow(to, value)
-	    sendersAccountUnlocked(from)
+		private
+		hasBalance(from, value) 
+		wontOverflow(to, value)
+		sendersAccountUnlocked(from)
 	{
 		tokenHolders[from].balance -= value;
-	    if (accountUnlocked(to)) {
-	        tokenHolders[to].balance += value;
-	    } else {
-	        tokenHolders[to].lockedBalance += value;
-	    }
-	    Transfer(from, to, value);
+		if (accountUnlocked(to)) {
+			tokenHolders[to].balance += value;
+		} else {
+			tokenHolders[to].lockedBalance += value;
+		}
+		Transfer(from, to, value);
 	}
 
 	/**
 	 * @dev Requires setting the allowance to 0 before it can be changed.
 	 */
 	function approve(address spender, uint value) 
-	    public
+		public
 		allowanceSetToZero(spender, value)
 		returns (bool)
 	{
@@ -125,19 +125,19 @@ contract LockableVoteToken is ERC20Token {
 	}
 	
 	function updateUnlockedBalance(address account)
-	    public
-	    onlyVotesContract 
+		public
+		onlyVotesContract 
 	{
-	    tokenHolders[account].balance += tokenHolders[account].lockedBalance;
-	    tokenHolders[account].lockedBalance = 0;
+		tokenHolders[account].balance += tokenHolders[account].lockedBalance;
+		tokenHolders[account].lockedBalance = 0;
 	}
 	
 	function accountUnlocked(address account) 
-	    private 
-	    returns (bool) 
-    {
-	    if (votes.voterEarliestTokenLockTime(account) != LinkedList.headTailIndex() && votes.voterEarliestTokenLockTime(account) < now) return false;
-	    return true;
+		private 
+		returns (bool) 
+	{
+		if (votes.voterEarliestTokenLockTime(account) != LinkedList.headTailIndex() && votes.voterEarliestTokenLockTime(account) < now) return false;
+		return true;
 	}
 	
 }

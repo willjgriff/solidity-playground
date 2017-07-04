@@ -14,14 +14,14 @@ contract UnrevealedLockTimesTest {
 	}
 	
 	function insertVoteAtTime(uint latestPreviousTime, uint lockTime, uint voteId) {
-	    lockTimes.insertVoteAtTime(latestPreviousTime, lockTime, voteId);
+		lockTimes.insertVoteAtTime(latestPreviousTime, lockTime, voteId);
 	}
 	
 	function removeVoteAtTime(uint lockTime, uint voteId) {
-	    lockTimes.removeVoteAtTime(lockTime, voteId);
+		lockTimes.removeVoteAtTime(lockTime, voteId);
 	}
 	
 	function getEarlyTime() constant returns (uint) {
-	    return lockTimes.getEarliestUnrevealedVoteLockTime();
+		return lockTimes.getEarliestUnrevealedVoteLockTime();
 	}
 }

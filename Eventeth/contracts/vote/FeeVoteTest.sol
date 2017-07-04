@@ -14,7 +14,7 @@ contract FeeVoteTest {
 	}
 	
 	function getSealedVote(address voter, FeeVote.VoteDecision voteDecision, bytes32 salt) constant returns (bytes32) {
-	    return FeeVote.getSealedVote(voter, voteDecision, salt);
+		return FeeVote.getSealedVote(voter, voteDecision, salt);
 	}
 	
 	function castVote(bytes32 sealedVoteHash) {
