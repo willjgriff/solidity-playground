@@ -23,7 +23,7 @@ contract YouTubeToken is usingOraclize {
 		OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
 		queryUpdater = msg.sender;
 
-		queryString = "https://www.googleapis.com/youtube/v3/channels?key=AIzaSyDcEFmmIi4q8GiDwtvxTuFyjocKes-WyGk&part=statistics";
+		queryString = "https://www.googleapis.com/youtube/v3/channels?key=API_KEY_GOES_HERE&part=statistics";
 		userParameter = "forUsername";
 		jsonPath = "items.0.statistics.subscriberCount";
 	}
