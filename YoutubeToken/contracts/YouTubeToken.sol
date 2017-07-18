@@ -1,58 +1,102 @@
 pragma solidity ^0.4.11;
 
-import "./Oraclize.sol";
+import "./ERC20.sol";
+import "./YouTubeSubscribers.sol";
+import "./utils/SafeMath.sol";
 
-contract YouTubeToken is usingOraclize {
+// Copied / compiled from OpenZeppelin. Shame we have to inherit YouTubeSubscribers.
+// Unfortunately we have to inherit usingOraclize so YouTubeSubscribers can not be a library.
+contract YouTubeToken is ERC20, YouTubeSubscribers {
 
-	string public queryString;
-	string public userParameter;
-	string public jsonPath;
-	address internal queryUpdater;
-	mapping(string => uint) internal subscriptionCounts;
-	mapping(bytes32 => string) internal queriedUsers;
+	using SafeMath for uint256;
 
-	event LogSubscriptionCountUpdated(string subscriber, string subscriptionCount);
+	string public name = "YouTubeToken";
+    string public symbol = "YTT";
+    uint256 public decimals = 18;
 
-	modifier onlyQueryUpdater() {
-		if (queryUpdater != msg.sender) revert();
-		_;
-	}
+	mapping(address => uint256) balances;
+	mapping(address => mapping(address => uint256)) allowed;
 
 	function YouTubeToken() {
 		// TODO: Delete this, for testing with private chain (testrpc) only
 		OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
 		queryUpdater = msg.sender;
 
-		queryString = "https://www.googleapis.com/youtube/v3/channels?key=API_KEY_GOES_HERE&part=statistics";
-		userParameter = "forUsername";
+		queryString = "https://www.googleapis.com/youtube/v3/channels?part=statistics";
+		userParam = "forUsername";
 		jsonPath = "items.0.statistics.subscriberCount";
+		apiKey = "AIzaSyA6cquJ6nhVDAUtxXIoXFYIVcBeFBFd68o";
 	}
 
-	// This should have a multi-sig wallet setter.
-	function setQuery(string _queryString, string _userParameter, string _jsonPath) public onlyQueryUpdater {
-		queryString = _queryString;
-		userParameter = _userParameter;
-		jsonPath = _jsonPath;
+	/**
+	* @dev transfer token for a specified address
+	* @param _to The address to transfer to.
+	* @param _value The amount to be transferred.
+	*/
+	function transfer(address _to, uint256 _value) returns (bool) {
+		balances[msg.sender] = balances[msg.sender].sub(_value);
+		balances[_to] = balances[_to].add(_value);
+		Transfer(msg.sender, _to, _value);
+		return true;
 	}
 
-	function addSubscriptionCount(string user) public {
-		string memory fullQueryString = createQueryString(user);
-		bytes32 queryId = oraclize_query("URL", fullQueryString);
-		queriedUsers[queryId] = user;
+	/**
+	* @dev Gets the balance of the specified address.
+	* @param _owner The address to query the the balance of. 
+	* @return An uint256 representing the amount owned by the passed address.
+	*/
+	function balanceOf(address _owner) constant returns (uint256 balance) {
+		return balances[_owner];
 	}
 
-	function __callback(bytes32 oraclizeId, string subscriptionCount) public {
-		string user = queriedUsers[oraclizeId];
-		subscriptionCounts[user] = parseInt(subscriptionCount);
-		LogSubscriptionCountUpdated(user, subscriptionCount);
-	}
-	 
-	function subscriptionCount(string subscriber) public constant returns(uint) {
-		return subscriptionCounts[subscriber];
+	/**
+	* @dev Transfer tokens from one address to another
+	* @param _from address The address which you want to send tokens from
+	* @param _to address The address which you want to transfer to
+	* @param _value uint256 the amout of tokens to be transfered
+	*/
+	function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
+		var _allowance = allowed[_from][msg.sender];
+
+		// Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
+		// if (_value > _allowance) throw;
+
+		balances[_to] = balances[_to].add(_value);
+		balances[_from] = balances[_from].sub(_value);
+		allowed[_from][msg.sender] = _allowance.sub(_value);
+		Transfer(_from, _to, _value);
+		return true;
 	}
 
-	// eg json(https://www.googleapis.com/youtube/v3/channels?key=AIzaSyDcEFmmIi4q8GiDwtvxTuFyjocKes-WyGk&part=statistics&forUsername=expovistaTV).items.0.statistics.subscriberCount";
-	function createQueryString(string user) private constant returns(string) {
-		return strConcat("json(", queryString, "&", userParameter, strConcat("=", user, ").", jsonPath));
+	/**
+	* @dev Aprove the passed address to spend the specified amount of tokens on behalf of msg.sender.
+	* @param _spender The address which will spend the funds.
+	* @param _value The amount of tokens to be spent.
+	*/
+	function approve(address _spender, uint256 _value) returns (bool) {
+
+		// To change the approve amount you first have to reduce the addresses`
+		//  allowance to zero by calling `approve(_spender, 0)` if it is not
+		//  already 0 to mitigate the race condition described here:
+		//  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+		if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+
+		allowed[msg.sender][_spender] = _value;
+		Approval(msg.sender, _spender, _value);
+		return true;
+	}
+
+	/**
+	 * @dev Function to check the amount of tokens that an owner allowed to a spender.
+	 * @param _owner address The address which owns the funds.
+	 * @param _spender address The address which will spend the funds.
+	 * @return A uint256 specifing the amount of tokens still avaible for the spender.
+	 */
+	function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+		return allowed[_owner][_spender];
+	}
+
+	function totalSupply() constant returns(uint) {
+		return totalSubscriptionCount;
 	}
 }
