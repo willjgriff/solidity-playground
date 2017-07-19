@@ -39,10 +39,10 @@ var displaySubscriptionCount = (user) => youTubeToken.balanceOf(user)
 
 // youTubeToken.test().then(defAddr => console.log(defAddr))
 
-// addUsersSubscriptions("expovistaTV", 0)
+addUsersSubscriptions("expovistaTV", 0)
 // addUsersSubscriptions("GeriGFX", 0)
 
-getOraclizeCost().then(fee => addUsersSubscriptions("GeriGFX", fee))
+// getOraclizeCost().then(fee => addUsersSubscriptions("GeriGFX", fee))
 // getOraclizeCost().then(fee => addUsersSubscriptions("epicenterbtc", fee))
 
 
