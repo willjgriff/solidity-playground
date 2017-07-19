@@ -74,6 +74,7 @@ contract YouTubeToken is usingOraclize, StandardToken {
 	// This requires an Oraclize request with a secure service that returns a verified address for a given Youtube username.
 	// The service would require a Youtube user to log in to their account and send a public address (ideally with an
 	// ec signature) to a centralised server which can then be relayed here instead of passing it in the below function.
+	// Re-estimation of the Oraclize query will also be needed if we actually submit two queries.
 	function registerUser(string user, string usersAddress)
 	public
 	payable
@@ -110,9 +111,11 @@ contract YouTubeToken is usingOraclize, StandardToken {
 	function updateBalanceWithSubscriptionCount(bytes32 oraclizeId, string response) private {
 		QueriedUser memory user = queriedUsers[oraclizeId];
 		delete queriedUsers[oraclizeId];
-		
 		uint subscriptionCountInt = parseInt(response);
-		balances[user.pubAddress].add(subscriptionCountInt);
+
+		uint balanceMultipliedByDecimals = subscriptionCountInt * (10 ** decimals);
+		balances[user.pubAddress] = balances[user.pubAddress].add(balanceMultipliedByDecimals);
+
 		registeredUsers[user.username] = true;
 		totalSubscriptionCount = totalSubscriptionCount.add(subscriptionCountInt);
 
