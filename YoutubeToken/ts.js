@@ -1,8 +1,7 @@
 var YouTubeToken = artifacts.require("./YouTubeToken.sol")
 var youTubeToken = YouTubeToken.at(YouTubeToken.address)
 
-// WATCH FOR SUBSCRIBER COUNT LOG
-var subscriptionCountUpdatedEvent = youTubeToken.LogSubscriptionCountUpdated();
+var subscriptionCountUpdatedEvent = youTubeToken.LogBalanceUpdatedWithSubscriptionCount();
 var watchForSubscription = () => subscriptionCountUpdatedEvent.watch((error, response) => {
 	if (!error) {
 		console.log("Subscriber: " + response.args.subscriber + " Subscription Count: " + response.args.subscriptionCount)
@@ -12,18 +11,8 @@ var watchForSubscription = () => subscriptionCountUpdatedEvent.watch((error, res
 	subscriptionCountUpdatedEvent.stopWatching()
 })
 
-var addUsersSubscriptions = user => {
-	watchForSubscription()
-	// Should be 0.0001
-	youTubeToken.addSubscriptionCount(user, { value: web3.toWei(0.0002, 'ether') })
-		.then(tx => console.log("Requested subscriptions to be added for user: " + user))
-}
-
-addUsersSubscriptions("expovistaTV")
-// addUsersSubscriptions("Epicenter")
-
-var debug = youTubeToken.Debug();
-debug.watch((error, response) => {
+var debug = youTubeToken.DebugQuery();
+var debugQuery = () => debug.watch((error, response) => {
 	if (!error) {
 		console.log("Query: " + response.args.query)
 	} else {
@@ -32,9 +21,33 @@ debug.watch((error, response) => {
 	debug.stopWatching()
 })
 
+var getOraclizeCost = () => youTubeToken.getOraclizeFee()
+	.then(fee => { console.log("Oraclize Fee: " + fee); return fee })
 
-// youTubeToken.subscriptionCount("expovistaTV")
-// 	.then(result => console.log(result))
+var addUsersSubscriptions = (user, oraclizeFee) => {
+	watchForSubscription()
+	debugQuery()
+	// Should be 0.0001      value: web3.toWei(0.02, 'ether')
+	youTubeToken.registerUser(user, web3.eth.accounts[2], { value: oraclizeFee })
+		.then(tx => console.log("Requested subscriptions to be added for user: " + user))
+}
+
+var displaySubscriptionCount = (user) => youTubeToken.balanceOf(user)
+	.then(result => console.log("SubscriberCount for user " + user + ": " + result))
+
+
+
+// youTubeToken.test().then(defAddr => console.log(defAddr))
+
+// addUsersSubscriptions("expovistaTV", 0)
+// addUsersSubscriptions("GeriGFX", 0)
+
+getOraclizeCost().then(fee => addUsersSubscriptions("GeriGFX", fee))
+// getOraclizeCost().then(fee => addUsersSubscriptions("epicenterbtc", fee))
+
+
+
+// displaySubscriptionCount("GeriGFX")
 
 // youTubeToken.totalSupply()
 // 	.then(totalSupply => console.log("Total Supply: " + totalSupply.toNumber()))

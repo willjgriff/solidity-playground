@@ -1,15 +1,28 @@
 {
-  "contract_name": "ERC20",
+  "contract_name": "StandardToken",
   "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
     {
       "constant": false,
       "inputs": [
         {
-          "name": "spender",
+          "name": "_spender",
           "type": "address"
         },
         {
-          "name": "value",
+          "name": "_value",
           "type": "uint256"
         }
       ],
@@ -40,15 +53,15 @@
       "constant": false,
       "inputs": [
         {
-          "name": "from",
+          "name": "_from",
           "type": "address"
         },
         {
-          "name": "to",
+          "name": "_to",
           "type": "address"
         },
         {
-          "name": "value",
+          "name": "_value",
           "type": "uint256"
         }
       ],
@@ -64,13 +77,8 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "who",
-          "type": "address"
-        }
-      ],
-      "name": "balanceOf",
+      "inputs": [],
+      "name": "decimals",
       "outputs": [
         {
           "name": "",
@@ -81,14 +89,45 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
-          "name": "to",
+          "name": "_to",
           "type": "address"
         },
         {
-          "name": "value",
+          "name": "_value",
           "type": "uint256"
         }
       ],
@@ -106,18 +145,18 @@
       "constant": true,
       "inputs": [
         {
-          "name": "owner",
+          "name": "_owner",
           "type": "address"
         },
         {
-          "name": "spender",
+          "name": "_spender",
           "type": "address"
         }
       ],
       "name": "allowance",
       "outputs": [
         {
-          "name": "",
+          "name": "remaining",
           "type": "uint256"
         }
       ],
@@ -172,5 +211,5 @@
   "unlinked_binary": "0x",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1500484687865
+  "updated_at": 1500484687866
 }

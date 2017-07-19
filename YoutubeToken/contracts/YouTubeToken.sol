@@ -1,21 +1,29 @@
 pragma solidity ^0.4.11;
 
-import "./ERC20.sol";
-import "./YouTubeSubscribers.sol";
-import "./utils/SafeMath.sol";
+import { usingOraclize } from "./Oraclize.sol";
+import { OraclizeAddrResolverI } from "./Oraclize.sol";
+import "./StandardToken.sol";
 
-// Copied / compiled from OpenZeppelin. Shame we have to inherit YouTubeSubscribers.
-// Unfortunately we have to inherit usingOraclize so YouTubeSubscribers can not be a library.
-contract YouTubeToken is ERC20, YouTubeSubscribers {
+contract YouTubeToken is usingOraclize, StandardToken {
 
-	using SafeMath for uint256;
+	string private constant ORACLIZE_DATA_SOURCE = "URL";
+	string public queryString;
+	string public userParam;
+	string public jsonPath;
+	string internal apiKey;
+	address internal queryUpdater;
 
-	string public name = "YouTubeToken";
-    string public symbol = "YTT";
-    uint256 public decimals = 18;
+	uint internal totalSubscriptionCount;
+	mapping(string => bool) internal registeredUsers;
+	mapping(bytes32 => QueriedUser) queriedUsers;
 
-	mapping(address => uint256) balances;
-	mapping(address => mapping(address => uint256)) allowed;
+	struct QueriedUser {
+		string username;
+		address pubAddress;
+	}
+
+	event LogBalanceUpdatedWithSubscriptionCount(string subscriber, uint subscriptionCount);
+	event DebugQuery(string query);
 
 	function YouTubeToken() {
 		// TODO: Delete this, for testing with private chain (testrpc) only
@@ -25,78 +33,105 @@ contract YouTubeToken is ERC20, YouTubeSubscribers {
 		queryString = "https://www.googleapis.com/youtube/v3/channels?part=statistics";
 		userParam = "forUsername";
 		jsonPath = "items.0.statistics.subscriberCount";
-		apiKey = "AIzaSyA6cquJ6nhVDAUtxXIoXFYIVcBeFBFd68o";
+		apiKey = "AIzaSyBZARNvH2aCLG6PSeTGlOIQT9yTM4NXr0s";
 	}
 
-	/**
-	* @dev transfer token for a specified address
-	* @param _to The address to transfer to.
-	* @param _value The amount to be transferred.
-	*/
-	function transfer(address _to, uint256 _value) returns (bool) {
-		balances[msg.sender] = balances[msg.sender].sub(_value);
-		balances[_to] = balances[_to].add(_value);
-		Transfer(msg.sender, _to, _value);
-		return true;
+	modifier onlyQueryUpdater() {
+		if (queryUpdater != msg.sender) revert();
+		_;
 	}
 
-	/**
-	* @dev Gets the balance of the specified address.
-	* @param _owner The address to query the the balance of. 
-	* @return An uint256 representing the amount owned by the passed address.
-	*/
-	function balanceOf(address _owner) constant returns (uint256 balance) {
-		return balances[_owner];
+	modifier notRegistered(string user) {
+		if (registeredUsers[user]) revert();
+		_;
 	}
 
-	/**
-	* @dev Transfer tokens from one address to another
-	* @param _from address The address which you want to send tokens from
-	* @param _to address The address which you want to transfer to
-	* @param _value uint256 the amout of tokens to be transfered
-	*/
-	function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-		var _allowance = allowed[_from][msg.sender];
-
-		// Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
-		// if (_value > _allowance) throw;
-
-		balances[_to] = balances[_to].add(_value);
-		balances[_from] = balances[_from].sub(_value);
-		allowed[_from][msg.sender] = _allowance.sub(_value);
-		Transfer(_from, _to, _value);
-		return true;
+	modifier hasOraclizeFee() {
+		if (getOraclizeFee() > this.balance) revert();
+		_;
 	}
 
-	/**
-	* @dev Aprove the passed address to spend the specified amount of tokens on behalf of msg.sender.
-	* @param _spender The address which will spend the funds.
-	* @param _value The amount of tokens to be spent.
-	*/
-	function approve(address _spender, uint256 _value) returns (bool) {
-
-		// To change the approve amount you first have to reduce the addresses`
-		//  allowance to zero by calling `approve(_spender, 0)` if it is not
-		//  already 0 to mitigate the race condition described here:
-		//  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-		if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
-
-		allowed[msg.sender][_spender] = _value;
-		Approval(msg.sender, _spender, _value);
-		return true;
+	modifier validOraclizeId(bytes32 oraclizeId) {
+		if (sha3(queriedUsers[oraclizeId].username) == sha3("")) revert();
+		_;
 	}
 
-	/**
-	 * @dev Function to check the amount of tokens that an owner allowed to a spender.
-	 * @param _owner address The address which owns the funds.
-	 * @param _spender address The address which will spend the funds.
-	 * @return A uint256 specifing the amount of tokens still avaible for the spender.
-	 */
-	function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
-		return allowed[_owner][_spender];
+	// This should have a multi-sig wallet setter.
+	function setQuery(string _queryString, string _userParam, string _jsonPath, string _apiKey)
+	public 
+	onlyQueryUpdater 
+	{
+		queryString = _queryString;
+		userParam = _userParam;
+		jsonPath = _jsonPath;
+		apiKey = _apiKey;
 	}
 
-	function totalSupply() constant returns(uint) {
+	function getOraclizeFee() public constant returns(uint) {
+		return oraclize_getPrice(ORACLIZE_DATA_SOURCE) * 2;
+	}
+
+	// This requires an Oraclize request with a secure service that returns a verified address for a given Youtube username.
+	// The service would require a Youtube user to log in to their account and send a public address (ideally with an
+	// ec signature) to a centralised server which can then be relayed here instead of passing it in the below function.
+	function registerUser(string user, string usersAddress)
+	public
+	payable
+	notRegistered(user)
+	hasOraclizeFee
+	{
+		// bytes32 queryId = oraclize_query(Request address for specified user)
+		bytes32 queryId = 123;
+		queriedUsers[queryId].username = user;
+		__callback(queryId, usersAddress);
+	}
+
+	function __callback(bytes32 oraclizeId, string response) 
+	public 
+	validOraclizeId(oraclizeId) 
+	{
+		if (queriedUsers[oraclizeId].pubAddress == 0) {
+			getSubscriptionCount(oraclizeId, response);
+		} else {
+			updateBalanceWithSubscriptionCount(oraclizeId, response);
+		}
+	}
+
+	function getSubscriptionCount(bytes32 oraclizeId, string response) private {
+		address usersAddress = parseAddr(response);
+		string memory username = queriedUsers[oraclizeId].username;
+		string memory fullQueryString = createOraclizeRequestString(username);
+		DebugQuery(fullQueryString);
+
+		bytes32 queryId = oraclize_query(ORACLIZE_DATA_SOURCE, fullQueryString);
+		queriedUsers[queryId] = QueriedUser(username, usersAddress);
+	}
+
+	function updateBalanceWithSubscriptionCount(bytes32 oraclizeId, string response) private {
+		QueriedUser memory user = queriedUsers[oraclizeId];
+		delete queriedUsers[oraclizeId];
+		
+		uint subscriptionCountInt = parseInt(response);
+		balances[user.pubAddress].add(subscriptionCountInt);
+		registeredUsers[user.username] = true;
+		totalSubscriptionCount = totalSubscriptionCount.add(subscriptionCountInt);
+
+		LogBalanceUpdatedWithSubscriptionCount(user.username, subscriptionCountInt);
+	}
+
+	function totalSupply() public constant returns(uint) {
 		return totalSubscriptionCount;
+	}
+
+	function createOraclizeRequestString(string user) private constant returns(string) {
+		string memory fullUserParam = strConcat(userParam, "=", user);
+		string memory apiKeyParam = strConcat("key=", apiKey);
+		string memory requestUrl = strConcat(queryString, "&", fullUserParam, "&", apiKeyParam);
+		string memory oraclizeRequest = strConcat("json(", requestUrl, ").", jsonPath);
+		return oraclizeRequest;
+	}
+
+	function() {
+		revert();
 	}
 }
