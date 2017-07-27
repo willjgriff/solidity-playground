@@ -16,27 +16,28 @@ class App extends Component {
       storageValue: 0,
       inputStorageValue: "",
       storageContract: null,
+      web3: null,
+
       youtubeToken: null,
-      oraclizeCost: "",
-      web3: null
+      oraclizeFee: "",
+      accBalance: "",
+      youtubeUser: ""
     }
 
     this.setInputStorageValue = this.setInputStorageValue.bind(this)
     this.setStorageValue = this.setStorageValue.bind(this)
+    this.registerUser = this.registerUser.bind(this)
   }
 
   componentWillMount() {
-    // Get network provider and web3 instance.
-    // See utils/getWeb3 for more info.
-    getWeb3
-    .then(results => {
+    getWeb3.then(results => {
       this.setState({ web3: results.web3, youtubeToken: new youtubeToken(results.web3) })
       // Instantiate contract once web3 provided.
       this.instantiateContract()
     })
-    .catch(() => {
-      console.log('Error finding web3.')
-    })
+    // .catch(() => {
+    //   console.log('Error finding web3.')
+    // })
   }
 
   instantiateContract() {
@@ -68,11 +69,36 @@ class App extends Component {
       })
     })
 
-    // this.state.youTubeToken.getOraclizeCost()
-      // .then(cost => this.setState({ oraclizeCost: cost }))
+    this.state.youtubeToken.getOraclizeCost()
+      .subscribe(oraclizeFee => this.setState({ oraclizeFee: oraclizeFee }))
 
-    this.setState({ oraclizeCost: this.state.youtubeToken.getOraclizeCost() })
+    this.getBalance()
   }
+
+  getBalance() {
+    this.state.youtubeToken.getAccounts()
+      .take(1)
+      .flatMap(account => this.state.youtubeToken.getBalanceOf(account))
+      .subscribe(balance => this.setState({ accBalance: balance }))
+  }
+
+  registerUser() {
+    this.state.youtubeToken.getAccounts()
+      .take(1)
+      .flatMap(account => this.state.youtube.addUserSubscriptionCount(this.state.youtubeUser, account))
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
   setInputStorageValue(event) {
     this.setState({ inputStorageValue: event.target.value })
@@ -86,6 +112,8 @@ class App extends Component {
         .then(storedValue => this.setState({ storageValue: storedValue.toNumber() }))
     })
   }
+
+
 
 
 
@@ -106,8 +134,6 @@ class App extends Component {
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p>
 
-              <p>Oraclize Cost for registering youtube user is: {this.state.oraclizeCost}</p>
-
               <label>
                 <p>New value:</p>
                 <input type="text" onChange={this.setInputStorageValue}/>
@@ -115,6 +141,19 @@ class App extends Component {
               <div className="button-container">
                 <button onClick={this.setStorageValue}>Set Value</button>
               </div>
+
+              <label>
+                <p>Register user:</p>
+                <input type="text" onChange={this.youtubeUser}/>
+              </label>
+              <div className="button-container">
+                <button onClick={this.registerUser}>Set Value</button>
+              </div>
+
+              <p>Oraclize Cost for registering youtube user is: {this.state.oraclizeFee}</p>
+              <p>Account 0 balance: {this.state.accBalance}</p>
+
+
 
             </div>
           </div>

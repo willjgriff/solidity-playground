@@ -4,7 +4,7 @@ import { usingOraclize } from "./Oraclize.sol";
 import { OraclizeAddrResolverI } from "./Oraclize.sol";
 import "./StandardToken.sol";
 
-contract YouTubeToken is usingOraclize, StandardToken {
+contract YoutubeToken is usingOraclize, StandardToken {
 
 	string private constant ORACLIZE_DATA_SOURCE = "URL";
 	string public queryString;
@@ -42,15 +42,15 @@ contract YouTubeToken is usingOraclize, StandardToken {
 
 	modifier hasOraclizeFee() { if (getOraclizeFee() > this.balance) revert(); _; }
 
-	modifier validOraclizeId(bytes32 oraclizeId) { 
+	modifier validOraclizeId(bytes32 oraclizeId) {
 		if (sha3(queriedUsers[oraclizeId].username) == sha3("")) revert();
 		_;
 	}
 
 	// This should have a multi-sig wallet setter.
 	function setQuery(string _queryString, string _userParam, string _jsonPath, string _apiKey)
-	public 
-	onlyQueryUpdater 
+	public
+	onlyQueryUpdater
 	{
 		queryString = _queryString;
 		userParam = _userParam;
@@ -59,7 +59,8 @@ contract YouTubeToken is usingOraclize, StandardToken {
 	}
 
 	function getOraclizeFee() public constant returns(uint) {
-		return oraclize_getPrice(ORACLIZE_DATA_SOURCE) * 2;
+		/*return oraclize_getPrice(ORACLIZE_DATA_SOURCE) * 2;*/
+		return 43;
 	}
 
 	// This requires an Oraclize request with a secure service that returns a verified address for a given Youtube username.
@@ -78,9 +79,9 @@ contract YouTubeToken is usingOraclize, StandardToken {
 		__callback(queryId, usersAddress);
 	}
 
-	function __callback(bytes32 oraclizeId, string response) 
-	public 
-	validOraclizeId(oraclizeId) 
+	function __callback(bytes32 oraclizeId, string response)
+	public
+	validOraclizeId(oraclizeId)
 	{
 		if (queriedUsers[oraclizeId].pubAddress == 0) {
 			getSubscriptionCount(oraclizeId, response);
