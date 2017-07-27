@@ -36,12 +36,13 @@ class YoutubeTokenCommands {
 
 	addUserSubscriptionCount(user, account) {
 		return this.youtubeContract
-			// value needs rejigging.
-			.flatMap(youtubeContract => youtubeContract.registerUser(user, account, { value: this.web3.toWei(0.01, 'ether') }))
+			// TODO: value needs rejigging.
+			.flatMap(youtubeContract => youtubeContract.registerUser(user, account,
+				{ from: account, value: this.web3.toWei(0.01, 'ether'), gas: 300000 }))
 			.map(tx => tx.tx)
 			.do(txHash => console.log("Submitted user registration tx: " + txHash))
 	}
-	
+
 }
 
 export default YoutubeTokenCommands
@@ -68,20 +69,6 @@ export default YoutubeTokenCommands
 // 	debugQuer.stopWatching()
 // })
 
-// var addUsersSubscriptions = (user, account) => {
-// 	watchForSubscription()
-// 	debugQuery()
-// 	getOraclizeCost()
-// 		.then(fee => youTubeToken.registerUser(user, web3.eth.accounts[account], { value: fee }))
-// 		.then(tx => console.log("Requested subscriptions to be added for user: " + user))
-// }
-//
-
-
-
-
-// addUsersSubscriptions("expovistaTV", 1)
-// addUsersSubscriptions("GeriGFX", 2)
 
 
 

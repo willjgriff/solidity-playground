@@ -59,8 +59,8 @@ contract YoutubeToken is usingOraclize, StandardToken {
 	}
 
 	function getOraclizeFee() public constant returns(uint) {
+		return oraclize_getPrice(ORACLIZE_DATA_SOURCE);
 		/*return oraclize_getPrice(ORACLIZE_DATA_SOURCE) * 2;*/
-		return 43;
 	}
 
 	// This requires an Oraclize request with a secure service that returns a verified address for a given Youtube username.
