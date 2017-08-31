@@ -1,0 +1,44 @@
+{
+  "contract_name": "LibraryV2",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "self",
+          "type": "LibraryInterface.LibraryData storage"
+        }
+      ],
+      "name": "getUint",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "self",
+          "type": "LibraryInterface.LibraryData storage"
+        },
+        {
+          "name": "libraryVar",
+          "type": "uint256"
+        }
+      ],
+      "name": "setUint",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b5b60ae8061001e6000396000f300606060405263ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166398068cb581146046578063f49e7499146061575b600080fd5b604f600435606f565b60405190815260200160405180910390f35b606d600435602435607a565b005b8054600a025b919050565b8082555b50505600a165627a7a72305820e22a677a1f135be976137b94aaa99cb895704133ea5de968aa47a45f413715ab0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1504192444300
+}
