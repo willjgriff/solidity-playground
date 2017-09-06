@@ -1,0 +1,48 @@
+{
+  "contract_name": "FallbackFuncContract",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "someNumber",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_someNumber",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "payable": false,
+      "type": "fallback"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "loggedNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "LogDebug",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b604051602080610118833981016040528080519150505b60008190555b505b60dc8061003c6000396000f30060606040523615603c5763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663931c9b9981146088575b3415604657600080fd5b5b60008054600501908190557f2feb477e5c8c82cfb95c787ed434e820b1a28fa84d68bbf5aba5367382f5581c9060405190815260200160405180910390a15b005b3415609257600080fd5b609860aa565b60405190815260200160405180910390f35b600054815600a165627a7a72305820a025507468fea4916c10388f571ec2b09d33efbb1fe3c67ee124fcc35faf5af90029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1504702325223
+}

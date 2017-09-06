@@ -1,0 +1,39 @@
+{
+  "contract_name": "FallbackContractDelegate",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "callFallbackContract",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "fallbackFuncContractAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "fallbackFunctionContractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "LogDebugFallbackAddress",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b60405160208061018e833981016040528080519150505b60008054600160a060020a031916600160a060020a0383161790555b505b61013b806100536000396000f300606060405263ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632d7ec4dd811461003d575b600080fd5b341561004857600080fd5b610050610052565b005b60005473ffffffffffffffffffffffffffffffffffffffff166040517f6173646600000000000000000000000000000000000000000000000000000000815260200160006040518083038160008661646e5a03f150506000547fed16a2d295fc97816075a53fa62a143ecc50341a54d0b1fe22aba8aea468d40b915073ffffffffffffffffffffffffffffffffffffffff1660405173ffffffffffffffffffffffffffffffffffffffff909116815260200160405180910390a15b5600a165627a7a723058200f2b37456ad6e423aaa7ca5f68a8f56e8c1ed9f4c1db4c9fd0bc76155fb4b8450029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1504702325222
+}

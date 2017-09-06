@@ -6,7 +6,7 @@ contract TheContract {
 
     using LibraryInterface for LibraryInterface.LibraryData;
 
-    LibraryInterface.LibraryData libraryInstance;
+    LibraryInterface.LibraryData private libraryInstance;
 
     function get() constant returns (uint) {
         return libraryInstance.getUint();

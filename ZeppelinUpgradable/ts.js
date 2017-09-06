@@ -8,6 +8,7 @@ const dispatcherStorage = DispatcherStorage.at(DispatcherStorage.address)
 const theContract = TheContract.at(TheContract.address)
 
 const setAndDisplayContractVar = toNumber => theContract.set(toNumber)
+    .then(tx => console.log(tx.receipt.logs))
     .then(() => theContract.get())
     .then(libraryVar => console.log("Lib var: " + libraryVar.toNumber()))
 
@@ -18,15 +19,15 @@ const updateLibrary = () => LibraryV2.new()
 const displayLibraryAddress = () => dispatcherStorage.libraryAddress()
     .then(libraryAddress => console.log("Library Address: " + libraryAddress))
 
-const logLibraryAddress = dispatcher.LogLibraryAddress()
-logLibraryAddress.watch((error, response) => {
-	if (!error) {
-		console.log("Library Address dispatched too: " + response.args.libraryAddress)
-	} else {
-		console.log(error)
-	}
-	logLibraryAddress.stopWatching()
-})
+// const logLibraryAddress = dispatcher.LogLibraryAddress()
+// logLibraryAddress.watch((error, response) => {
+// 	if (!error) {
+// 		console.log("Library Address dispatched too: " + response.args.libraryAddress)
+// 	} else {
+// 		console.log(error)
+// 	}
+// 	logLibraryAddress.stopWatching()
+// })
 
 displayLibraryAddress()
     .then(() => setAndDisplayContractVar(11))
