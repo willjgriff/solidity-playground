@@ -5,8 +5,8 @@ import "./DispatcherStorage.sol";
 contract Dispatcher {
 
     function() {
-        // Is there a better way of referring to the DispatcherStorage? Can't seem to access
-        // contract storage from fallback function so can't store it in the constructor.
+        // Is there a better way of referring to the DispatcherStorage? Can't  access contract storage from
+        // fallback function as this is referenced as a library so can't store it in the constructor.
         DispatcherStorage dispatcherStorage = DispatcherStorage(0x1111222233334444555566667777888899990000);
         uint32 functionReturnTypeSize = dispatcherStorage.returnTypeSizes(msg.sig);
         address libraryAddress = dispatcherStorage.libraryAddress();

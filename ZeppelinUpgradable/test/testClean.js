@@ -6,7 +6,7 @@ const TheContract = artifacts.require('TheContract.sol')
 
 // Note: Migrations of the Dispatcher should be disabled to enable these tests. Otherwise they will run and change the
 // the hardcoded dispatcher storage address "1111222233334444555566667777888899990000" to something else preventing
-// proper deployment of the below.
+// proper deployment of the Dispatcher.
 contract("TheContract", () => {
 
     let dispatcherStorage, theContract;
