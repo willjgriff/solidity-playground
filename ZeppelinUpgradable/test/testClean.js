@@ -11,7 +11,7 @@ contract("TheContract", () => {
 
     let dispatcherStorage, theContract;
     let libraryVar = 10;
-    let setGasCost = 48258;
+    let setFunctionGasCost = 48258;
     // Unfortunate hack required to update hardcoded dispatcher storage address before each test
     let currentDispatcherStorageAddress = "1111222233334444555566667777888899990000";
 
@@ -48,7 +48,7 @@ contract("TheContract", () => {
 
         it("gas cost is as expected", () => {
             return theContract.set(libraryVar)
-                .then(tx => assert.equal(tx.receipt.gasUsed, setGasCost, "gas used was not as expected"))
+                .then(tx => assert.equal(tx.receipt.gasUsed, setFunctionGasCost, "gas used was not as expected"))
         })
     })
 
@@ -67,7 +67,7 @@ contract("TheContract", () => {
 
         it("gas cost is as expected", () => {
             return theContract.set(libraryVar)
-                .then(tx => assert.equal(tx.receipt.gasUsed, setGasCost, "gas used was not as expected"))
+                .then(tx => assert.equal(tx.receipt.gasUsed, setFunctionGasCost, "gas used was not as expected"))
         })
     })
 
