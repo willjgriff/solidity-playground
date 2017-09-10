@@ -1,6 +1,6 @@
 const ERC23Token = artifacts.require("./StandardERC23Token.sol")
 const TokenReceiver = artifacts.require("./StandardERC23Receiver.sol");
-const Utils = require("./TestUtils.js")
+const TestUtils = require("./TestUtils.js")
 
 contract("ERC23Token", accounts => {
 
@@ -26,7 +26,8 @@ contract("ERC23Token", accounts => {
         })
 
         it("doesn't transfer to contract address", () => {
-            return Utils.assertThrows(() => erc23Token.transfer(erc23Token.address, 100), 1000000)
+            const maxGasAvailable = 4000000
+            return TestUtils.assertThrows(() => erc23Token.transfer(erc23Token.address, 100, {gas: maxGasAvailable}), maxGasAvailable)
                 .then(() => erc23Token.balanceOf(accounts[0]))
                 .then(acc0Balance => assert.equal(acc0Balance.toNumber(), 1000, "Senders balance is incorrect"))
         })

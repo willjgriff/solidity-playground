@@ -1,56 +1,22 @@
-
-// TODO: Tidy this up and understand how it works.
-const getTransactionReceiptMined = (txHash, interval) => {
-
-    const transactionReceiptAsync = function (resolve, reject) {
-
-        this.getTransactionReceipt(txHash, (error, receipt) => {
-            if (error) {
-                reject(error);
-            } else if (receipt == null) {
-                setTimeout(
-                    () => transactionReceiptAsync(resolve, reject),
-                    interval ? interval : 500);
-            } else {
-                resolve(receipt);
-            }
-        });
-    };
-
-    if (Array.isArray(txHash)) {
-        return Promise.all(txHash.map(
-            oneTxHash => this.getTransactionReceiptMined(oneTxHash, interval)));
-    } else if (typeof txHash === "string") {
-        return new Promise(transactionReceiptAsync);
-    } else {
-        throw new Error("Invalid Type: " + txHash);
-    }
-};
-
-// Copied from here: https://gist.github.com/xavierlepretre/d5583222fde52ddfbc58b7cfa0d2d0a9
-exports.assertThrows = (action, gasToUse) => {
+// This has been tested with the real Ethereum network and Testrpc.
+// Copied and edited from: https://gist.github.com/xavierlepretre/d5583222fde52ddfbc58b7cfa0d2d0a9
+exports.assertThrows = (contractMethodCall, maxGasAvailable) => {
 
     return new Promise((resolve, reject) => {
         try {
-            resolve(action())
-        } catch (e) {
-            reject(e)
+            resolve(contractMethodCall())
+        } catch (error) {
+            reject(error)
         }
     })
-        .then(txn => {
-            // https://gist.github.com/xavierlepretre/88682e871f4ad07be4534ae560692ee6
-            return getTransactionReceiptMined(txn)
-        })
-        .then(receipt => {
-            // We are in Geth
-            assert.equal(receipt.gasUsed, gasToUse, "should have used all the gas")
+        .then(tx => {
+            assert.equal(tx.receipt.gasUsed, maxGasAvailable, "tx successful, the max gas available was not consumed")
         })
         .catch(error => {
-            if ((error + "").indexOf("invalid JUMP") || (error + "").indexOf("out of gas") || (error + "").indexOf("invalid opcode") > -1) {
-                // We are in TestRPC
-            } else if ((error + "").indexOf("please check your gas amount") > -1) {
-                // We are in Geth for a deployment
-            } else {
+            if ((error + "").indexOf("invalid opcode") < 0 && (error + "").indexOf("out of gas") < 0) {
+                // Checks if the error is from TestRpc. If it is then ignore it.
+                // Otherwise relay/throw the error produced by the above assertion.
+                // Note that no error is thrown when using a real Ethereum network AND the assertion above is true.
                 throw error
             }
         })
