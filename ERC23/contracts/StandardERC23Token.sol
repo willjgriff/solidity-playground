@@ -32,9 +32,9 @@ contract StandardERC23Token is ERC23, StandardToken {
     }
 
     function isContract(address accountAddress) private returns (bool) {
-        uint length;
-        assembly { length := extcodesize(accountAddress) }
-        return length > 0;
+        uint accountCodeSize;
+        assembly { accountCodeSize := extcodesize(accountAddress) }
+        return accountCodeSize > 0;
     }
 
     function notifyContract(address from, address to, uint value, bytes data) private returns (bool) {
