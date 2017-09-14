@@ -1,6 +1,6 @@
 const ERC23Token = artifacts.require("./StandardERC23Token.sol")
 const TokenReceiver = artifacts.require("./StandardERC23Receiver.sol");
-const TestUtils = require("./TestUtils.js")
+const TestUtils = require("../../TestUtils.js")
 
 contract("ERC23Token", accounts => {
 

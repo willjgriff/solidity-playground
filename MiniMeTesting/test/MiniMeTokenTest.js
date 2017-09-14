@@ -1,5 +1,6 @@
 const MiniMeTokenFactory = artifacts.require("./MiniMeTokenFactory.sol")
 const MiniMeToken = artifacts.require("MiniMeToken.sol")
+const TestUtils = require("../../TestUtils.js")
 
 contract("MiniMeToken", accounts => {
 
@@ -47,9 +48,10 @@ contract("MiniMeToken", accounts => {
         "string cloneTokenSymbol, uint snapshotBlock, bool transfersEnabled)", () => {
 
         it("copies balances", () => {
+
             return miniMeToken.createCloneToken("TestTokenCopy", 18, "TT2", 0, true)
-            // Need to listen for NewCloneToken event to get cloned token address. Not sure how to do that here, will work it out.
-                .then(miniMeTokenCopy => MiniMeToken.at(miniMeTokenCopy).balanceOf(accounts[1]))
+                .then(() => TestUtils.listenForEvent(miniMeToken.NewCloneToken()))
+                .then(newCloneTokenEventArgs => MiniMeToken.at(newCloneTokenEventArgs._cloneToken).balanceOf(accounts[1]))
                 .then(copiedAcc1Balance => assert.equal(copiedAcc1Balance, 1000, "Acc1 balance is incorrect, token was not copied successfully"))
         })
     })
