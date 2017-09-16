@@ -1,7 +1,6 @@
 // This has been tested with the real Ethereum network and Testrpc.
 // Copied and edited from: https://gist.github.com/xavierlepretre/d5583222fde52ddfbc58b7cfa0d2d0a9
 exports.assertThrows = (contractMethodCall, maxGasAvailable) => {
-
     return new Promise((resolve, reject) => {
         try {
             resolve(contractMethodCall())
