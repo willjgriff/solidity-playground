@@ -57,7 +57,7 @@ contract("MiniMeToken", accounts => {
 
     describe("transfer(address to, uint256 amount)", () => {
 
-        it("increases in gas cost the first time miniMeToken is copied", () => {
+        it("increases in gas cost the first time miniMeToken is copied", () => { 
 
             let miniMeTokenFirstCopy;
 
