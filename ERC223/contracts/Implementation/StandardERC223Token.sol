@@ -1,9 +1,15 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.15;
 
-import "./ERC223.sol";
-import "./ERC223Receiver.sol";
+import "../Interface/ERC223.sol";
+import "../Interface/ERC223Receiver.sol";
 import "zeppelin-solidity/contracts/token/StandardToken.sol";
 
+/**
+ * @notice Currently proposed standard implementation of ERC223 Token.
+ *         Differences to ERC20:
+ *         Checks if the receiver is a contract address during tx's and if so checks it can handle the funds.
+ *         Allows submitting of encoded function calls to the receiving address if it's a contract.
+ */
 contract StandardERC223Token is ERC223, StandardToken {
 
     function StandardERC223Token(uint _totalSupply){
@@ -16,8 +22,8 @@ contract StandardERC223Token is ERC223, StandardToken {
     }
 
     function transfer(address to, uint value, bytes data) public returns (bool) {
-        if (isContract(to)) notifyContract(msg.sender, to, value, data);
         super.transfer(to, value);
+        if (isContract(to)) notifyContractOrFail(msg.sender, to, value, data);
         return true;
     }
 
@@ -26,8 +32,8 @@ contract StandardERC223Token is ERC223, StandardToken {
     }
 
     function transferFrom(address from, address to, uint value, bytes data) public returns (bool) {
-        if (isContract(to)) notifyContract(from, to, value, data);
         super.transferFrom(from, to, value);
+        if (isContract(to)) return notifyContractOrFail(from, to, value, data);
         return true;
     }
 
@@ -37,9 +43,9 @@ contract StandardERC223Token is ERC223, StandardToken {
         return accountCodeSize > 0;
     }
 
-    function notifyContract(address from, address to, uint value, bytes data) private returns (bool) {
+    function notifyContractOrFail(address from, address to, uint value, bytes data) private returns (bool) {
         ERC223Receiver receiverContract = ERC223Receiver(to);
-        receiverContract.tokenFallback(from, value, data);
+        receiverContract.tokenFallback(msg.sender, from, value, data);
         return true;
     }
 }

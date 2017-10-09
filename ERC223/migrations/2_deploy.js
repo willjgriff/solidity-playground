@@ -1,5 +1,5 @@
-// const TokenReceiver = artifacts.require("./StandardERC23Receiver.sol");
+const TokenReceiver = artifacts.require("./ExampleERC223Receiver.sol");
 
-module.exports = function(deployer) {
-    // deployer.deploy(TokenReceiver);
-};
+module.exports = deployer => {
+    // deployer.deploy(TokenReceiver)
+}
