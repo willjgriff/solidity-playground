@@ -1,12 +1,12 @@
 pragma solidity ^0.4.13;
 
-import "./ERC23.sol";
-import "./ERC23Receiver.sol";
+import "./ERC223.sol";
+import "./ERC223Receiver.sol";
 import "zeppelin-solidity/contracts/token/StandardToken.sol";
 
-contract StandardERC23Token is ERC23, StandardToken {
+contract StandardERC223Token is ERC223, StandardToken {
 
-    function StandardERC23Token(uint _totalSupply){
+    function StandardERC223Token(uint _totalSupply){
         totalSupply = _totalSupply;
         balances[msg.sender] = totalSupply;
     }
@@ -38,7 +38,7 @@ contract StandardERC23Token is ERC23, StandardToken {
     }
 
     function notifyContract(address from, address to, uint value, bytes data) private returns (bool) {
-        ERC23Receiver receiverContract = ERC23Receiver(to);
+        ERC223Receiver receiverContract = ERC223Receiver(to);
         receiverContract.tokenFallback(from, value, data);
         return true;
     }
