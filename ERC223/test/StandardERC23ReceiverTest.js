@@ -1,0 +1,1 @@
+contract("StandardERC23ReceiverTest", )
