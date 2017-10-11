@@ -12,12 +12,13 @@ contract ContractV1 is ContractInterface {
     // any increase in cost because of this.
     Resolver public resolver;
     uint public storageValue;
+    string public dynamicallySizedValue;
 
-    function testReturnValue() public constant returns (uint) {
+    function returnValue() public constant returns (uint) {
         return 10;
     }
 
-    function setStorageValue(uint value) {
+    function setStorageValue(uint value) public {
         storageValue = value;
     }
 
@@ -26,4 +27,17 @@ contract ContractV1 is ContractInterface {
     function getStorageValue() public constant returns (uint) {
         return storageValue;
     }
+
+    function setDynamicallySizedValue(string dynamicValue) public {
+        dynamicallySizedValue = dynamicValue;
+    }
+
+    function getDynamicallySizedValue() public constant returns (string) {
+        return dynamicallySizedValue;
+    }
+
+    function getDynamicallySizedValueSize() public constant returns (uint) {
+        return bytes(dynamicallySizedValue).length;
+    }
+
 }
