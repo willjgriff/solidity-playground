@@ -1,7 +1,7 @@
 # solidity-upgradable-contracts
 
 <b>EtherRouter</b><br/>
-Project experimenting with the <a href="https://github.com/ownage-ltd/ether-router">EtherRouter</a> package for creating upgradable contracts. Has very basic tests experimenting with upgrading a basic contract's functions and understnading how storage is managed. Has helped me to fully understand the infamous delegate call.
+Project experimenting with the <a href="https://github.com/ownage-ltd/ether-router">EtherRouter</a> package for creating upgradable contracts. Has very basic tests experimenting with upgrading a basic contract's functions with static and dynamic return types. Has helped me to fully understand the infamous delegate call and how storage is managed.
 
 <b>ZeppelinUpgradable</b><br/>
 Older investigation into upgradable contracts, copied from this article: https://blog.zeppelin.solutions/proxy-libraries-in-solidity-79fbe4b970fd and made more readable for my own understanding.
