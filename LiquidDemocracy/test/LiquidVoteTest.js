@@ -26,15 +26,14 @@ contract("LiquidVote", accounts => {
     describe("delegateVote(address delegateToAddress, uint previousNodePosition)", () => {
 
         it("updates delegated to address and adds to delegated from list of delegated voter", async () => {
-            const previousNodePosition = await liquidVote.getPreviousNodeIdForDelegate(acc0)
-            await liquidVote.delegateVote(acc1, previousNodePosition)
+            await liquidVote.delegateVote(acc1)
             const originalVoter = await liquidVote.getVoter(acc0)
             const delegatedToVoter = await liquidVote.getVoter(acc1)
             
             assert.isFalse(originalVoter[1], "Has voted bool not as expected")
             assert.equal(originalVoter[2], acc1, "Delegated to is not as expected")
-            assert.equal(originalVoter[3], 0, "Delegated from has increased")
-            assert.equal(delegatedToVoter[3], 1, "Delegated from has not increased")
+            assert.equal(originalVoter[3], 0, "Delegated from array has increased in size")
+            assert.equal(delegatedToVoter[3], 1, "Delegated from array has not increased in size")
         })
     })
 })
