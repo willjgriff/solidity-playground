@@ -1,6 +1,5 @@
 pragma solidity ^0.4.15;
 
-//import "./LinkedList.sol";
 import "../../contracts/LinkedList.sol";
 
 contract LinkedListHarness {

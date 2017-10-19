@@ -1,8 +1,8 @@
-const LinkedList = artifacts.require("./LinkedList.sol")
+const ArrayLib = artifacts.require("./ArrayLib.sol")
 const LiquidVote = artifacts.require("./LiquidVote.sol")
 
 module.exports = function(deployer) {
-    deployer.deploy(LinkedList)
+    deployer.deploy(ArrayLib)
     // deployer.link(LinkedList, LiquidVote)
     // deployer.deploy(LiquidVote)
 }
