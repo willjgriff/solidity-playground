@@ -1,24 +1,77 @@
+const MiniMeTokenFactory = artifacts.require("MiniMeTokenFactory.sol")
+const MiniMeToken = artifacts.require("MiniMeToken.sol")
 const ArrayLib = artifacts.require("ArrayLib.sol")
 const LiquidVote = artifacts.require("LiquidVote.sol")
 const TestUtils = require("../../TestUtils")
 
 contract("LiquidVote", accounts => {
 
-    let liquidVote
+    let voteToken, liquidVote
 
     beforeEach(async () => {
+        miniMeTokenFactory = await MiniMeTokenFactory.new()
+        voteToken = await MiniMeToken.new(miniMeTokenFactory.address, 0, 0, "Vote Token", 18, "VTT", true)
         LiquidVote.link("ArrayLib", ArrayLib.address)
-        liquidVote = await LiquidVote.new()
+        liquidVote = await LiquidVote.new(voteToken.address)
     })
 
     describe("vote(bool _voteDirection)", () => {
 
-        it("updates voter with having voted and correct descision", async () => {
+        it("updates voter with having voted and correct decision", async () => {
             await liquidVote.vote(true)
-            const voter = await liquidVote.getVoter(accounts[0])
+            const voter = await liquidVote.voters(accounts[0])
 
             assert.isTrue(voter[0], "Vote direction not as expected")
+            assert.equal(voter[1], 0, "Vote direction array position not as expected")
             assert.isTrue(voter[2], "Has voted bool not as expected")
+        })
+
+        it("updates voter with having voted and correct decision after 2 votes are cast for same decision", async () => {
+            await liquidVote.vote(true, {from:accounts[0]})
+            await liquidVote.vote(true, {from:accounts[1]})
+            const voter2 = await liquidVote.voters(accounts[1])
+
+            assert.isTrue(voter2[0], "Vote direction not as expected")
+            assert.equal(voter2[1].toNumber(), 1, "Vote direction array position not as expected")
+            assert.isTrue(voter2[2], "Has voted bool not as expected")
+        })
+
+        it("updates voted for address array", async () => {
+            await liquidVote.vote(true, {from:accounts[0]})
+            await liquidVote.vote(true, {from:accounts[1]})
+            const expectedVotedForAddresses = [accounts[0], accounts[1]]
+            const actualVotedForAddresses = await liquidVote.getVotedForAddresses()
+
+            assert.deepEqual(actualVotedForAddresses, expectedVotedForAddresses, "Voted for addresses are not as expected")
+        })
+
+        it("updates voted against address array", async () => {
+            await liquidVote.vote(false, {from:accounts[0]})
+            await liquidVote.vote(false, {from:accounts[1]})
+            const expectedVotedForAddresses = [accounts[0], accounts[1]]
+            const actualVotedForAddresses = await liquidVote.getVotedAgainstAddresses()
+
+            assert.deepEqual(actualVotedForAddresses, expectedVotedForAddresses, "Voted for addresses are not as expected")
+        })
+
+        it("removes address from voted for address array when vote is changed", async () => {
+            await liquidVote.vote(true, {from:accounts[0]})
+            await liquidVote.vote(false, {from:accounts[0]})
+            const votedForAddresses = await liquidVote.getVotedForAddresses();
+            const votedAgainstAddresses = await liquidVote.getVotedAgainstAddresses();
+
+            assert.deepEqual(votedForAddresses, [], "Voted for addresses are not as expected")
+            assert.deepEqual(votedAgainstAddresses, [accounts[0]], "Voted against addresses are not as expected")
+        })
+
+        it("removes address from voted against address array when vote is changed", async () => {
+            await liquidVote.vote(false, {from:accounts[0]})
+            await liquidVote.vote(true, {from:accounts[0]})
+            const votedForAddresses = await liquidVote.getVotedForAddresses();
+            const votedAgainstAddresses = await liquidVote.getVotedAgainstAddresses();
+
+            assert.deepEqual(votedForAddresses, [accounts[0]], "Voted for addresses are not as expected")
+            assert.deepEqual(votedAgainstAddresses, [], "Voted against addresses are not as expected")
         })
     })
 
@@ -29,12 +82,11 @@ contract("LiquidVote", accounts => {
 
         it("updates delegated from voter as expected", async () => {
             await liquidVote.delegateVote(delegateTo, {from: delegateFrom})
-            const originalVoter = await liquidVote.getVoter(delegateFrom)
+            const originalVoter = await liquidVote.voters(delegateFrom)
 
             assert.isFalse(originalVoter[2], "Has voted bool not as expected")
             assert.equal(originalVoter[3], delegateTo, "Delegated to is not as expected")
             assert.equal(originalVoter[4], 0, "Delegated from array position should be 0")
-            assert.equal(originalVoter[5], 0, "Delegated from array has increased in size")
         })
 
         it("updates delegated from list of delegated voter", async () => {
@@ -103,7 +155,7 @@ contract("LiquidVote", accounts => {
         it("gas increase for 10 chained delegations is less than 9000 gas", async () => {
             let gasForCheapestCall = 0
 
-            Array.from(new Array(8).keys())
+            await Array.from(new Array(8).keys())
                 .forEach(async accountNumber => {
                     const tx = await liquidVote.delegateVote(accounts[accountNumber + 1], {from: accounts[accountNumber]})
                     gasForCheapestCall = tx.receipt.gasUsed
@@ -123,14 +175,66 @@ contract("LiquidVote", accounts => {
             const delegateTo2 = accounts[2]
             const delegateFrom2 = accounts[3]
             await liquidVote.delegateVote(delegateTo, {from: delegateFrom})
-            const expectedVoter = await liquidVote.getVoter(delegateFrom)
+            const expectedVoter = await liquidVote.voters(delegateFrom)
 
             await liquidVote.delegateVote(delegateTo2, {from: delegateTo})
             await liquidVote.delegateVote(delegateFrom, {from: delegateFrom2})
-            const actualVoter = await liquidVote.getVoter(delegateFrom)
+            const actualVoter = await liquidVote.voters(delegateFrom)
 
             assert.equal(actualVoter[3], expectedVoter[3], "Voters are not the same")
         })
 
+    })
+
+    describe("voteWeightOfAddress(address voterAddress)", () => {
+
+        it("calculates correct weight for single voter", async () => {
+            const voterAddress = accounts[1]
+            const expectedWeight = 1000
+            await voteToken.generateTokens(voterAddress, expectedWeight)
+            const actualWeight = await liquidVote.voteWeightOfAddress(voterAddress)
+
+            assert.equal(actualWeight, expectedWeight, "Voter weight is not as expected")
+        })
+
+        // TODO: A check needs to be added to prevent a user voting who has delegated their vote.
+        it("calculates correct weight for voter with 1 delegated from address", async () => {
+            const expectedWeight = 1500
+            const voterAddress1 = accounts[1]
+            const voterAddress2 = accounts[2]
+            await voteToken.generateTokens(voterAddress1, 1000)
+            await voteToken.generateTokens(voterAddress2, 500)
+
+            await liquidVote.delegateVote(accounts[1], {from: accounts[2]})
+            const actualWeight = await liquidVote.voteWeightOfAddress(voterAddress1)
+
+            assert.equal(actualWeight, expectedWeight, "Voter weight is not as expected")
+        })
+
+        it("calculates correct weight for voter with 2 delegated from addresses", async () => {
+            const expectedWeight = 1500
+            const delegatedToVoter = accounts[5]
+            await voteToken.generateTokens(delegatedToVoter, 500)
+            for (let accountNumber = 0; accountNumber < 2; accountNumber++) {
+                await voteToken.generateTokens(accounts[accountNumber], 500)
+                await liquidVote.delegateVote(delegatedToVoter, {from: accounts[accountNumber]})
+            }
+            const actualWeight = await liquidVote.voteWeightOfAddress(delegatedToVoter)
+
+            assert.equal(actualWeight, expectedWeight, "Voter weight is not as expected")
+        })
+
+        it("calculates correct weight for voter with 9 delegated from addresses", async () => {
+            const expectedWeight = 1000 + 500 * 9
+            const delegatedToVoter = accounts[0]
+            await voteToken.generateTokens(delegatedToVoter, 1000)
+            for (let accountNumber = 1; accountNumber < 10; accountNumber++) {
+                await voteToken.generateTokens(accounts[accountNumber], 500)
+                await liquidVote.delegateVote(delegatedToVoter, {from: accounts[accountNumber]})
+            }
+            const actualWeight = await liquidVote.voteWeightOfAddress(delegatedToVoter)
+
+            assert.equal(actualWeight, expectedWeight, "Voter weight is not as expected")
+        })
     })
 })
