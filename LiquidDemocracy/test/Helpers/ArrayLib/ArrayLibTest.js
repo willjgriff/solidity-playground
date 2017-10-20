@@ -1,6 +1,6 @@
 const ArrayLib = artifacts.require("./ArrayLib.sol")
 const ArrayLibHarness = artifacts.require("./ArrayLibHarness.sol")
-const TestUtils = require("../../../TestUtils")
+const TestUtils = require("../../../../TestUtils")
 
 contract("ArrayLib", accounts => {
 
