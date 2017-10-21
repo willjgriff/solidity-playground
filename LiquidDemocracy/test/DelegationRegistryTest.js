@@ -123,6 +123,19 @@ contract("DelegationRegistry", accounts => {
             assert.equal(actualVoter[3], expectedVoter[3], "Voters are not the same")
         })
 
+        it("sets correct new index for address moved in the delegatedVoter's fromAddresses array", async () => {
+            const delegateFrom1 = accounts[0]
+            const delegateFrom2 = accounts[1]
+            const delegateTo = accounts[2]
+
+            await delegationRegistry.delegateVote(delegateTo, {from: delegateFrom1})
+            await delegationRegistry.delegateVote(delegateTo, {from: delegateFrom2})
+            await delegationRegistry.delegateVote(accounts[3], {from: delegateFrom1})
+            const delegateFrom2Voter = await delegationRegistry.delegatedVoters(delegateFrom2)
+
+            assert.equal(delegateFrom2Voter[1].toNumber(), 0, "Delegate from 2 voter from addresses index should be 0")
+        })
+
     })
 
     describe("undelegateVote(address delegatedVoterAddress)", () => {
@@ -130,13 +143,27 @@ contract("DelegationRegistry", accounts => {
         it("undelegates vote", async () => {
             const delegateFrom = accounts[0]
             const delegateTo = accounts[1]
+
             await delegationRegistry.delegateVote(delegateTo, {from: delegateFrom})
-            await delegationRegistry.undelegateVote(delegateFrom, {from: delegateFrom})
+            await delegationRegistry.undelegateVote({from: delegateFrom})
             const delegatedToAddress = await delegationRegistry.getDelegatedVoterToAddress(delegateFrom)
             const delegatedFromAddresses = await delegationRegistry.getDelegatedFromAddressesForVoter(delegateTo)
 
             assert.equal(delegatedToAddress, 0, "Delegated to address should be 0")
             assert.deepEqual(delegatedFromAddresses, [], "Delegated from addresses should be empty")
+        })
+
+        it("sets correct new index for address moved in the delegatedVoter's fromAddresses array", async () => {
+            const delegateFrom1 = accounts[0]
+            const delegateFrom2 = accounts[1]
+            const delegateTo = accounts[2]
+
+            await delegationRegistry.delegateVote(delegateTo, {from: delegateFrom1})
+            await delegationRegistry.delegateVote(delegateTo, {from: delegateFrom2})
+            await delegationRegistry.undelegateVote({from: delegateFrom1})
+            const delegateFrom2Voter = await delegationRegistry.delegatedVoters(delegateFrom2)
+
+            assert.equal(delegateFrom2Voter[1].toNumber(), 0, "Delegate from 2 voter from addresses index should be 0")
         })
     })
 
@@ -158,7 +185,6 @@ contract("DelegationRegistry", accounts => {
             assert.equal(actualWeight, expectedWeight, "Voter weight is not as expected")
         })
 
-        // TODO: A check needs to be added to prevent a user voting who has delegated their vote.
         it("calculates correct weight for voter with 1 delegated from address", async () => {
             const expectedWeight = 1500
             const voterAddress1 = accounts[1]

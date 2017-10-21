@@ -21,7 +21,7 @@ contract("ArrayLib", accounts => {
         it("removes element at position 0", async () => {
             const originalArray = [accounts[0], accounts[1]]
             const expectedArray = [accounts[1]]
-            const actualArray = await arrayLibHarness.removeElement(originalArray, 0);
+            const actualArray = await arrayLibHarness.removeElement(originalArray, 0)
 
             assert.deepEqual(actualArray, expectedArray, "Array is not as expected")
         })
@@ -29,7 +29,7 @@ contract("ArrayLib", accounts => {
         it("removes element at end of array", async () => {
             const originalArray = [accounts[0], accounts[1], accounts[2]]
             const expectedArray = [accounts[0], accounts[1]]
-            const actualArray = await arrayLibHarness.removeElement(originalArray, 2);
+            const actualArray = await arrayLibHarness.removeElement(originalArray, 2)
 
             assert.deepEqual(actualArray, expectedArray, "Array is not as expected")
         })

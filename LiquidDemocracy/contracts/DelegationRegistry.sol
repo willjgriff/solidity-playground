@@ -5,7 +5,7 @@ import "./MiniMeToken.sol";
 
 // TODO: This needs to be copyable. Currently an account can vote and delegate their vote and both will be counted.
 // If we use a copy of the DelegationRegistry for each Vote we can prevent voting if the account has delegated their vote.
-// An account must then undelegate first (we can create a function that allows undelegating and voting to occur within a single tx).
+// An account must then undelegate before voting (we can create a function that allows undelegating and voting to occur within a single tx).
 contract DelegationRegistry {
 
     using ArrayLib for address[];
@@ -35,8 +35,7 @@ contract DelegationRegistry {
         // Undelegate previous delegate
         address currentDelegatedToAddress = delegateFromVoter.toAddress;
         if (currentDelegatedToAddress != 0x0) {
-            uint fromAddressesArrayIndex = delegatedVoters[currentDelegatedToAddress].toAddressFromAddressesIndex;
-            delegatedVoters[currentDelegatedToAddress].fromAddresses.removeElement(fromAddressesArrayIndex);
+            removeDelegatedVoterAndUpdateIndex(delegateFromVoter, delegatedVoters[currentDelegatedToAddress]);
         }
 
         // Update delegated from voter
@@ -59,12 +58,20 @@ contract DelegationRegistry {
         return false;
     }
 
-    function undelegateVote(address delegatedVoterAddress) public {
-        DelegatedVoter storage delegatedFromVoter = delegatedVoters[delegatedVoterAddress];
+    function undelegateVote() public {
+        DelegatedVoter storage delegatedFromVoter = delegatedVoters[msg.sender];
         DelegatedVoter storage delegatedToVoter = delegatedVoters[delegatedFromVoter.toAddress];
+        delegatedFromVoter.toAddress = 0x0;
+        removeDelegatedVoterAndUpdateIndex(delegatedFromVoter, delegatedToVoter);
+    }
 
-        delegatedFromVoter.toAddress = 0;
-        delegatedToVoter.fromAddresses.removeElement(delegatedFromVoter.toAddressFromAddressesIndex);
+    function removeDelegatedVoterAndUpdateIndex(DelegatedVoter storage delegatedFromVoter, DelegatedVoter storage delegatedToVoter) private {
+        address[] storage fromAddresses = delegatedToVoter.fromAddresses;
+        address lastAddressInFromAddresses = fromAddresses[fromAddresses.length - 1];
+        DelegatedVoter storage lastDelegatedVoterInFromAddresses = delegatedVoters[lastAddressInFromAddresses];
+
+        lastDelegatedVoterInFromAddresses.toAddressFromAddressesIndex = delegatedFromVoter.toAddressFromAddressesIndex;
+        fromAddresses.removeElement(delegatedFromVoter.toAddressFromAddressesIndex);
     }
 
     function voteWeightOfAddress(address voterAddress, address voteTokenAddress) public constant returns (uint) {
