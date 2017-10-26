@@ -6,18 +6,18 @@ See individual folders Readme's for details regarding the contracts within.
 
 These are primarily for personal development, in order of when I wrote them (the first one's in the lists are the most recent and best representation of my understanding of Solidity). I started by using the decypher.tv tutorials for inspiration. I then moved on to building larger sets of contracts which can be seen in Governance and MiscExperiments.
 
-DecypherTv:
+#### DecypherTv:
 - Crowdsale
 - Coin Flipper (uses Oraclize)
 - Basic Escrow
 
-Governance:
+#### Governance:
 - Liquid Democracy
 - Liquid Lockable Vote
 - Futarchy (SchellingVote)
 - Basic Vote
 
-Misc:
+#### Misc:
 - ERC223
 - MiniMe Testing
 - Ipfs Experiment 
