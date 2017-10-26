@@ -11,3 +11,12 @@ I started by using the decypher.tv tutorials for inspiration. I then moved on to
 More recent Truffle projects have JS tests for demonstrating functionality, older projects use JS scripts executed directly through the Truffle console.
 
 Note: <code>npm install</code> is required in some projects.
+
+
+More recent experiments with Solidity than those in solidity-playground.
+
+<b>ERC223</b><br/>
+Basic implementation of the current ERC223 token proposal with minimal tests for experimentation. Largely copied from Aragon's implementation here: https://github.com/aragon/ERC23. Demonstrates how to call functions using byte/hex encoded function calls.
+
+<b>MiniMeTesting</b><br/>
+Playing with the Giveth MiniMeToken from https://github.com/Giveth/minime with some basic tests to understand its functionality.

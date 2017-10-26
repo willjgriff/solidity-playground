@@ -1,2 +1,6 @@
 # Node Dependencies
 node_modules/
+
+.idea
+ERC223/build
+LiquidDemocracy/build
