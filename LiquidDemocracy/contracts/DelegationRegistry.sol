@@ -3,10 +3,14 @@ pragma solidity ^0.4.15;
 import "./Helpers/ArrayLib.sol";
 import "./MiniMeToken.sol";
 
-// TODO: This needs to be copyable. Currently an account can vote and delegate their vote and both will be counted.
-// If we use a copy of the DelegationRegistry for each Vote we can prevent voting if the account has delegated their vote.
-// An account must then undelegate before voting (we can create a function that allows undelegating and voting to occur within a single tx).
-// Also all contracts need more comments.
+// I have attempted to make this DelegationRegistry copyable by having it accept a parent delegation registry in the constructor.
+// It turns out it's quite hard to compare tree's of delegations where the parent structure is adhered to if and only
+// if the child structure at each node hasn't been changed, and the child structure is adhered to where it is different to the parent.
+// The difficulty is mainly because links can be created in the child that the parent knows nothing of.
+// This has led me to the recursive mess that can be seen in the final few functions of this contract. Note some of the functionality works
+// as can be seen by running the tests.
+
+// Note that all the contracts and tests here are unfinished and require function docs and refactoring to increase readability.
 contract DelegationRegistry {
 
     using ArrayLib for address[];
@@ -99,32 +103,42 @@ contract DelegationRegistry {
         return voteWeightOfAddressWithChildRegistry(voterAddress, voteTokenAddress, 0);
     }
 
-    // TODO: Is it a problem this is public?
-    // Also we shouldn't use inner functions as it will reduce the delegation levels available, less readability...
+    // TODO: we shouldn't use inner functions as it will reduce the delegation levels available, less readability...
     function voteWeightOfAddressWithChildRegistry(address voterAddress, address voteTokenAddress, address childRegistryAddress) public constant returns (uint) {
+        uint voteWeight;
+        MiniMeToken voteToken = MiniMeToken(voteTokenAddress);
+
+        voteWeight += voteWeightOfDelegatedFrom(voterAddress, voteToken, childRegistryAddress);
+
         if (isRootRegistry()) {
-            return calculateWeightOfAddress(voterAddress, voteTokenAddress, childRegistryAddress);
+            voteWeight += voteToken.balanceOf(voterAddress);
         } else {
-            return parentRegistry.voteWeightOfAddressWithChildRegistry(voterAddress, voteTokenAddress, this);
+            voteWeight += parentRegistry.voteWeightOfAddressWithChildRegistry(voterAddress, voteTokenAddress, this);
         }
+
+        return voteWeight;
     }
 
-    function calculateWeightOfAddress(address voterAddress, address voteTokenAddress, address childRegistryAddress) private constant returns (uint) {
+    function voteWeightOfDelegatedFrom(address voterAddress, MiniMeToken voteToken, address childRegistryAddress) private constant returns (uint) {
 
         DelegatedVoter storage delegatedVoter = delegatedVoters[voterAddress];
-        MiniMeToken voteToken = MiniMeToken(voteTokenAddress);
-        uint voteWeight = voteToken.balanceOf(voterAddress);
+        DelegationRegistry childDelegationRegistry = DelegationRegistry(childRegistryAddress);
+        uint voteWeight;
+        address delegatedFromAddress;
 
-        for (uint i = 0; i < delegatedVoter.fromAddresses.length; i++) {
-
-            address delegatedFromAddress = delegatedVoter.fromAddresses[i];
-
-            if (childRegistryAddress == 0x0) {
+        if (childRegistryAddress == 0x0) {
+            for (uint i = 0; i < delegatedVoter.fromAddresses.length; i++) {
+                delegatedFromAddress = delegatedVoter.fromAddresses[i];
                 voteWeight += voteWeightOfAddressWithChildRegistry(delegatedFromAddress, voteToken, 0x0);
-            } else {
-                DelegationRegistry childDelegationRegistry = DelegationRegistry(childRegistryAddress);
-                if (!childDelegationRegistry.shouldIgnoreParent(delegatedFromAddress) ||
-                    childDelegationRegistry.getDelegatedVoterToAddress(delegatedFromAddress) == voterAddress) {
+            }
+
+        } else if (!childDelegationRegistry.shouldIgnoreParent(voterAddress)) {
+            for (uint j = 0; j < delegatedVoter.fromAddresses.length; j++) {
+                delegatedFromAddress = delegatedVoter.fromAddresses[j];
+
+                if (!childDelegationRegistry.shouldIgnoreParent(delegatedFromAddress)
+//                    || childDelegationRegistry.getDelegatedVoterToAddress(delegatedFromAddress) == voterAddress
+                ) {
 
                     voteWeight += voteWeightOfAddressWithChildRegistry(delegatedFromAddress, voteToken, childRegistryAddress);
                 }
