@@ -2,7 +2,7 @@ const MiniMeTokenFactory = artifacts.require("MiniMeTokenFactory.sol")
 const MiniMeToken = artifacts.require("MiniMeToken.sol")
 const ArrayLib = artifacts.require("ArrayLib.sol")
 const DelegationRegistry = artifacts.require("DelegationRegistry.sol")
-const TestUtils = require("../../Utils/TestUtils")
+const TestUtils = require("../../../Utils/TestUtils")
 
 contract("DelegationRegistry", accounts => {
 

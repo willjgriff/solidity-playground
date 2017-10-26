@@ -3,7 +3,7 @@ const MiniMeToken = artifacts.require("MiniMeToken.sol")
 const ArrayLib = artifacts.require("ArrayLib.sol")
 const LiquidVote = artifacts.require("LiquidVote.sol")
 const DelegationRegistry = artifacts.require("DelegationRegistry.sol")
-const TestUtils = require("../../Utils/TestUtils")
+const TestUtils = require("../../../Utils/TestUtils")
 
 contract("LiquidVote", accounts => {
 

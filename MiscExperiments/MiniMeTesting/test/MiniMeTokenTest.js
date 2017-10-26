@@ -1,6 +1,6 @@
 const MiniMeTokenFactory = artifacts.require("./MiniMeTokenFactory.sol")
 const MiniMeToken = artifacts.require("MiniMeToken.sol")
-const TestUtils = require("../../Utils/TestUtils.js")
+const TestUtils = require("../../../Utils/TestUtils.js")
 
 contract("MiniMeToken", accounts => {
 
