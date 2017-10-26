@@ -1,6 +1,6 @@
 "use strict";
 
-var Utils = require("./Utils/Web3Utils.js")
+var Utils = require("./utils/Web3Utils.js")
 // UNCOMMENT THE CONTRACT WE WANT TO PLAY WITH
 // var CoinFlipper = artifacts.require("./BlockDecidingCoinFlipper.sol")
 var CoinFlipper = artifacts.require("./OracleDecidingCoinFlipper.sol")
