@@ -12,7 +12,7 @@ These are primarily for personal development, in order of when I wrote them (the
 - Basic Escrow
 
 ### Governance:
-- Liquid Democracy
+- Liquid Democracy (WIP)
 - Liquid Lockable Vote
 - Futarchy (SchellingVote)
 - Basic Vote
