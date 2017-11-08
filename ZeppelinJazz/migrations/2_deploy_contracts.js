@@ -1,7 +1,7 @@
 const Reentrance = artifacts.require("./Reentrance.sol")
-const ReenAttack = artifacts.require("./ReenAttack.sol")
+const ReenAttack = artifacts.require("./ReentranceAttack.sol")
 
 module.exports = function(deployer) {
-  deployer.deploy(Reentrance);
-  deployer.deploy(ReenAttack);
-};
+  // deployer.deploy(Reentrance)
+  //     .then(() => deployer.deploy(ReenAttack, Reentrance.address))
+}

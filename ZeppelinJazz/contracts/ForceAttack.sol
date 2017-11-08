@@ -7,10 +7,6 @@ contract ForceAttack {
 
     }
 
-    function () payable {
-
-    }
-
     function attackForce(address forceAddr) {
         selfdestruct(forceAddr);
     }
