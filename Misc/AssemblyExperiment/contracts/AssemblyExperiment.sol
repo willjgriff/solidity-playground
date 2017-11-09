@@ -27,7 +27,7 @@ contract AssemblyExperiment {
 //
 //    }
 
-    // TODO: Check out the delegatecall reddit post again to understand it's advantages.
+    // Delegatecall() is useful for reusing functionality without having to redeploy, making calls cheaper.
     function doAssemblyDelegateCall(address delegateToAddress, string bytes32FunctionToCall) public constant returns(bytes32) {
         uint256 callSuccessValue;
         bytes4 functionSigBytes = getFunctionSigBytes(bytes32FunctionToCall);
