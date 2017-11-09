@@ -11,21 +11,21 @@ These are primarily for personal development, in order of when I wrote them (the
 - Coin Flipper (uses Oraclize)
 - Basic Escrow
 
+### Tokens:
+- ERC223
+- MiniMe Testing
+- Youtube Token (uses Oraclize)
+
 ### Governance:
 - Liquid Democracy (WIP)
 - Liquid Lockable Vote
 - Futarchy (SchellingVote)
 - Basic Vote
 
-### Tokens:
-- ERC223
-- MiniMe Testing
-- Youtube Token (uses Oraclize)
-
 ### Upgradable:
 - Ether Router
 - Zeppelin Upgradable Proxy
-- Fallback Storage Access
+- Fallback Storage Access Test
 
 ### Misc:
 - Assembly Experiments

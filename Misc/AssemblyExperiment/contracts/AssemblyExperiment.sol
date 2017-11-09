@@ -1,16 +1,19 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 
 contract AssemblyExperiment {
 
-    function getFunctionSig() public constant returns (bytes4) {
+    // Used in doStandardDelegateCall()
+    uint public updateByDelegate;
+
+    function getFunctionSig() public pure returns (bytes4) {
         // bytes4 truncates everything beyond the first 4 bytes.
         bytes4 func;
         assembly { func := calldataload(0) }
         return func;
     }
 
-    function getMemory() public constant returns (bytes32) {
+    function getMemory() public pure returns (bytes32) {
         bytes32 memoryData;
         assembly {
             // Location 0x40 holds the location of where free memory begins.
@@ -21,14 +24,20 @@ contract AssemblyExperiment {
         return memoryData;
     }
 
-    // Test different delegatecalls. Assembly delegatecall vs standard delegatecall.
-    // I think the assembly delegatecall can return a value but the standard one can't.
-//    function doStandardDelegateCall(address delegateToAddress) {
-//
-//    }
+    // Standard delegate call cannot return a value.
+    // delegatecall() is useful for reusing functionality without having to redeploy contracts, making calls cheaper.
+    // Everywhere delegate call is used needs to be scrutinised as the called contract has access to storage of calling
+    // contract. We should almost never allow a delegatecall to an unsafe/unknown contract (eg like the below).
+    function doStandardDelegateCall(address delegateToAddress, string functionToCall) public {
+        bytes4 functionSigBytes = getFunctionSigBytes(functionToCall);
+        delegateToAddress.delegatecall(functionSigBytes);
+    }
 
-    // Delegatecall() is useful for reusing functionality without having to redeploy, making calls cheaper.
-    function doAssemblyDelegateCall(address delegateToAddress, string bytes32FunctionToCall) public constant returns(bytes32) {
+    function doAssemblyDelegateCall(address delegateToAddress, string bytes32FunctionToCall)
+    public
+    view
+    returns (bytes32)
+    {
         uint256 callSuccessValue;
         bytes4 functionSigBytes = getFunctionSigBytes(bytes32FunctionToCall);
 
@@ -41,18 +50,18 @@ contract AssemblyExperiment {
         }
     }
 
-    function getFunctionSigBytes(string functionSig) public constant returns (bytes4) {
-        bytes4 functionSigBytes = bytes4(sha3(functionSig));
+    function getFunctionSigBytes(string functionSig) public pure returns (bytes4) {
+        bytes4 functionSigBytes = bytes4(keccak256(functionSig));
         return functionSigBytes;
     }
 
-    function testBytes1() public constant returns (bytes1) {
+    function testBytes1() public pure returns (bytes1) {
         bytes1 oneByte = 0x12;
         return oneByte;
     }
 
-    function testByteArray() public constant returns (byte[]) {
-        byte[] byteArray;
+    function testByteArray() public view returns (byte[]) {
+        byte[] storage byteArray;
         byteArray.push(0x12);
         return byteArray;
     }

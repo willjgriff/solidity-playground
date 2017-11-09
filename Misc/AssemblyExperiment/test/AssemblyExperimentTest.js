@@ -17,6 +17,16 @@ contract("AssemblyExperiment", accounts => {
         assert.equal(memory, 96)
     })
 
+    it("doStandardDelegateCall() updates var in calling contract and not in called contract", async () => {
+        const delegateToContract = await DelegateToContract.new()
+        await assemblyExperiment.doStandardDelegateCall(delegateToContract.address, "updateStorageVar()")
+        const delegateToContractVar = await delegateToContract.updateByDelegate()
+        const assemblyExperimentVar = await assemblyExperiment.updateByDelegate()
+
+        assert.equal(delegateToContractVar.toNumber(), 0)
+        assert.equal(assemblyExperimentVar.toNumber(), 321)
+    })
+
     it("doAssemblyDelegateCall() returns value from delegate to contract function call", async () => {
         const delegateToContract = await DelegateToContract.new();
         const delegatedFunctionResult = await assemblyExperiment.doAssemblyDelegateCall(delegateToContract.address, "get32ByteValue()")
