@@ -22,6 +22,11 @@ These are primarily for personal development, in order of when I wrote them (the
 - MiniMe Testing
 - Youtube Token (uses Oraclize)
 
+### UpgradableContracts:
+- Ether Router
+- Zeppelin Upgradable Proxy
+- Fallback Storage Access
+
 ### Misc:
 - Assembly Experiments
 - Zeppelin Ethernaut
