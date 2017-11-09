@@ -2,9 +2,9 @@
 
 Contracts written in Solidity, using Truffle for deployment and testing. 
 
-See individual folders Readme's for details regarding the contracts within.
+See the individual folders Readme's for details regarding the contracts within.
 
-These are primarily for personal development, in order of when I wrote them (the first one's described in each of the lists/folders are the most recent and best representation of my understanding of Solidity). I started by using the decypher.tv tutorials for inspiration. I then moved on to building larger sets of contracts which can be seen in Governance and Misc.
+These are primarily for personal development, in order of when I wrote them (the first one's described in each of the lists/folders are the most recent and best representation of my understanding of Solidity). I started by using the decypher.tv tutorials for inspiration. I then moved on to building larger sets of contracts which can be seen in Governance, Tokens and Misc.
 
 ### DecypherTv:
 - Crowdsale
@@ -17,12 +17,15 @@ These are primarily for personal development, in order of when I wrote them (the
 - Futarchy (SchellingVote)
 - Basic Vote
 
-### Misc:
-- Assembly Experiments
+### Tokens:
 - ERC223
 - MiniMe Testing
-- Ipfs Experiment 
 - Youtube Token (uses Oraclize)
+
+### Misc:
+- Assembly Experiments
+- Zeppelin Ethernaut
+- Ipfs Experiment 
 
 More recent Truffle projects have JS tests for demonstrating functionality, older projects use JS scripts executed directly through the Truffle console.
 
