@@ -1,4 +1,6 @@
-# solidity-upgradable-contracts
+# Upgradable
+
+Methods to enable upgrading of contracts
 
 ### EtherRouter
 Project experimenting with the <a href="https://github.com/ownage-ltd/ether-router">EtherRouter</a> package for creating upgradable contracts. Has very basic tests experimenting with upgrading a basic contract's functions with static and dynamic return types. Has helped me to fully understand the infamous delegate call and how storage is managed.
