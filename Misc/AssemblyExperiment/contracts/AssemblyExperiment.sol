@@ -66,4 +66,32 @@ contract AssemblyExperiment {
         return byteArray;
     }
 
+    // From here: https://www.reddit.com/r/ethdev/comments/7btqix/bug_converting_string_to_bytes32/
+    function stringToBytes32(string memory source) pure returns (bytes32 result) {
+        // Why we need the below check:
+        // It seems memory is structured into 32 byte slots. Arrays consist of a 32 byte slot that represents it's size
+        // (length) in whatever the type specifies (eg, a string is a byte array, so the size is how many individual bytes
+        // the array is made up of, alternatively for a uint256[] array which consists of 32 byte slots, the size is how many
+        // 32 byte slots it takes up) followed by 32 byte chunks of the bytes of the data (as many 32 byte slots as is
+        // required to store the whole length of the array).
+
+        // This means that if you pass an empty string or pass nothing, the first 32 byte slot of the string (length)
+        // is 0 and the following 32 byte slot which would hold the first 32 bytes of the data has nothing to go in it
+        // so will just be used for the next thing stored in memory (which is what would be loaded by the following assembly code).
+        // There's no point reserving an en empty 32 byte slot for no data.
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        // Note that it seems when we use source outside the context of a string then source refers to the address of
+        // source in mem, not the string it points to. Also note that the first 32 bytes of a string/array seem to
+        // represent the length of the string/array. Which is why we skip the first 32 bytes.
+        assembly {
+            result := mload(add(source, 32))
+            // This is the same as the above:
+            // return(add(source, 32), 32)
+        }
+    }
+
 }

@@ -50,4 +50,9 @@ contract("AssemblyExperiment", accounts => {
             assert.deepEqual(byteArray, ["0x12"])
         })
     })
+
+    it("stringToBytes32() returns correct bytes32", async () => {
+        const stringBytes32 = await assemblyExperiment.stringToBytes32("Hola")
+        assert.equal(stringBytes32, "0x486f6c6100000000000000000000000000000000000000000000000000000000")
+    })
 })
