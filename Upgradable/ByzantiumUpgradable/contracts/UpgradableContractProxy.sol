@@ -6,6 +6,7 @@ pragma solidity ^0.4.18;
 // no effect on the expected behaviour when properly using the upgradable contract through this proxy.
 contract UpgradableContractProxy {
 
+    // Implementation contracts should include this address at the first location in storage.
     address private upgradableContractAddress;
 
     function UpgradableContractProxy(address initialContractAddress) public {
@@ -25,6 +26,8 @@ contract UpgradableContractProxy {
                 returndatacopy(0x0, 0x0, returndatasize) // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
                 return(0x0, returndatasize) // return(fromMemAddress, sizeInBytes)
             }
+        } else {
+            revert();
         }
     }
 
