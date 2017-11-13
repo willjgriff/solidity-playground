@@ -2,6 +2,9 @@
 
 Methods to enable upgrading of contracts
 
+### ByzantiumUpgradable
+Set of contracts enabling upgradability post the Byzantium HF. Based largely on the structure of the EtherRouter but whihc uses the new Assembly opcodes `returndatacopy` and `returndatasize` to remove the need for the EtherRouter's Resolver.
+
 ### EtherRouter
 Project experimenting with the <a href="https://github.com/ownage-ltd/ether-router">EtherRouter</a> package for creating upgradable contracts. Has very basic tests experimenting with upgrading a basic contract's functions with static and dynamic return types. Has helped me to fully understand the infamous delegate call and how storage is managed.
 

@@ -1,26 +1,41 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
-import "./upgradableImplementations/ContractInterface.sol";
-
+// TODO: Should be ownable, by some multi-sig / dao.
 contract UpgradableContractProxy {
 
-    ContractInterface private upgradableContract;
+    address private upgradableContractAddress;
 
-    function UpgradableContractProxy(address initialContractImplAddress) {
-        upgradableContract = ContractInterface(initialContractImplAddress);
+    function UpgradableContractProxy(address initialContractAddress) public {
+        upgradableContractAddress = initialContractAddress;
     }
 
+    function setContractAddress(address newContractAddress) public {
+        upgradableContractAddress = newContractAddress;
+    }
+
+    // Copied from a message in the Solidity gitter
     function () public {
-        bool contractCallSuccess = delegatecall
+
+        // Could load this using assembly, although I think it's clearer when using standard Solidity
+        address upgradableContractMem = upgradableContractAddress;
+
+        // Should test if we can get the calldata somehow without using assembly, perhaps with msg.data
+        assembly {
+            let freeMemAddress := mload(0x40)
+            // mstore(memAddress, value)
+            mstore(0x40, add(freeMemAddress, calldatasize))
+            // calldatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+            calldatacopy(freeMemAddress, 0x0, calldatasize)
+            // delegatecall(gasAllowed, address, inMemAddress, inSizeBytes, outMemAddress, outSizeBytes) returns/pushes to stack (1 on success, 0 on failure)
+            switch delegatecall(gas, upgradableContractMem, freeMemAddress, calldatasize, 0, 0)
+                // revert(fromMemAddress, toMemAddress) ends execution and returns value
+                case 0 { revert(0x0, 0x0) }
+                default {
+                    // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+                    returndatacopy(0x0, 0x0, returndatasize)
+                    // return(fromMemAddress, sizeInBytes)
+                    return(0x0, returndatasize)
+                }
+        }
     }
-
-//    function symbol() public view returns (string) {
-//        if (bts_address1.call(bytes4(keccak256("symbol()")))) {
-//            assembly {
-//                returndatacopy(0,0, returndatasize)
-//                return(0, returndatasize)
-//            }
-//        }
-//    }
-
 }

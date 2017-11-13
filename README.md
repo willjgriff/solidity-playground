@@ -23,6 +23,7 @@ These are primarily for personal development, in order of when I wrote them (the
 - Basic Vote
 
 ### Upgradable:
+- Byzantium Upgradable
 - Ether Router
 - Zeppelin Upgradable Proxy
 - Fallback Storage Access Test

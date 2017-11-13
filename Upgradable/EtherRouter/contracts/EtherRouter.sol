@@ -23,6 +23,7 @@ contract EtherRouter {
             // as we can't return a value using the standard one.
             // Note mload(0x40) returns the location of where free memory begins.
             calldatacopy(mload(0x40), 0, calldatasize)
+            // delegatecall(gas, address, inMem, insize, outMem, outsize)
             r := delegatecall(sub(gas, 700), destination, mload(0x40), calldatasize, mload(0x40), outsize)
         }
 

@@ -1,5 +1,8 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
+// Note we don't need to use this interface (although it is advised if it's unlikely it will change).
+// We can cast the UpgradableContractProxy as the specific implementations eg ContractV1.sol or ContractV2.sol.
+// As can be seen in the
 contract ContractInterface {
 
     function returnValue() public constant returns (uint);
@@ -9,5 +12,4 @@ contract ContractInterface {
 
     function setDynamicallySizedValue(string dynamicValue) public;
     function getDynamicallySizedValue() public constant returns (string);
-    function getDynamicallySizedValueSize() public constant returns (uint);
 }

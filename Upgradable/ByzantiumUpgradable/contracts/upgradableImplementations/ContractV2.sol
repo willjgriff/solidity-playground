@@ -1,8 +1,10 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import "./ContractInterface.sol";
 
 contract ContractV2 is ContractInterface {
+
+    address private upgradableContractAddress;
 
     uint public storageValue;
     string public dynamicallySizedValue;
@@ -25,26 +27,19 @@ contract ContractV2 is ContractInterface {
     function getDynamicallySizedValue() public constant returns (string) {}
 
     /**
-     * @notice Updated functions returning a different dynamically sized value.
+     * @notice The 2 functions below represent newly updated functions returning a different dynamically sized value.
      *         Ideally we would do our best to avoid changing the signature of updated functions.
-     *         If adhering to an interface we have to keep empty functions around that we may or may
-     *         not wish to register with the resolver depending on the situation.
-     *         If we keep them we must also keep the function returning the return size.
-     *         We must also update calling code to use the new signatures.
+     *         If adhering to an interface we have to update it and everywhere the interface is used.
      */
     function setDynamicallySizedValue(uint[] _updatedDynamicallySizedValue) public {
         updatedDynamicallySizedValue = _updatedDynamicallySizedValue;
     }
 
     /**
-     * @notice This function signature must be different than the one in the interface.
+     * @notice This new function signature must be different than the one in the interface.
      *         Note the return value does not contribute to the signature.
      */
     function getUpdatedDynamicallySizedValue() public constant returns (uint[]) {
         return updatedDynamicallySizedValue;
-    }
-
-    function getDynamicallySizedValueSize() public constant returns (uint) {
-        return updatedDynamicallySizedValue.length;
     }
 }

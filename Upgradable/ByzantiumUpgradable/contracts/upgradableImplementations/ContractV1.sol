@@ -1,16 +1,17 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import "./ContractInterface.sol";
 
 contract ContractV1 is ContractInterface {
 
-    // Stored data lives in the EtherRouter. The first and only variable in the Ether router is a reference to the Resolver.
-    // Therefore the first reference in each contract using the EtherRouter must be set aside for the resolver.
-    // The current storage layout must remain the same in all the upgraded contracts, although it can be added to.
+    // Stored data actually lives in the UpgradableContractProxy. However the storage layout is specified here in the implementing contracts.
+    // The first and only variable in the UpgradableContractProxy is a reference to the address of this contract.
+    // Therefore the first reference in each contract using the UpgradableContractProxy must be set aside for this address.
+    address private upgradableContractAddress;
+
+    // The storage layout must remain the same in all the upgraded contracts, although it can be added to.
     // Note that besides the potential mess of unnecessary variables this could create over time, there isn't currently
     // any increase in cost because of this.
-
-
     uint public storageValue;
     string public dynamicallySizedValue;
 
@@ -34,10 +35,6 @@ contract ContractV1 is ContractInterface {
 
     function getDynamicallySizedValue() public constant returns (string) {
         return dynamicallySizedValue;
-    }
-
-    function getDynamicallySizedValueSize() public constant returns (uint) {
-        return bytes(dynamicallySizedValue).length;
     }
 
 }
