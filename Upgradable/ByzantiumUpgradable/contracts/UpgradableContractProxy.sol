@@ -13,30 +13,45 @@ contract UpgradableContractProxy {
         upgradableContractAddress = newContractAddress;
     }
 
-    // Copied mainly from a message in the Solidity gitter
     function () public {
 
-        // Could load this using assembly, although I think it's clearer when using standard Solidity
-        address upgradableContractMem = upgradableContractAddress;
+        bool callSuccess = upgradableContractAddress.delegatecall(msg.data);
 
-        // Should test if we can get the calldata somehow without using assembly, perhaps with msg.data
-        assembly {
-            let freeMemAddress := mload(0x40)
-            // mstore(memAddress, value)
-            mstore(0x40, add(freeMemAddress, calldatasize))
-            // calldatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-            calldatacopy(freeMemAddress, 0x0, calldatasize)
-
-            // delegatecall(gasAllowed, callAddress, inMemAddress, inSizeBytes, outMemAddress, outSizeBytes) returns/pushes to stack (1 on success, 0 on failure)
-            switch delegatecall(gas, upgradableContractMem, freeMemAddress, calldatasize, 0, 0)
-                // revert(fromMemAddress, sizeInBytes) ends execution and returns value
-                case 0 { revert(0x0, 0) }
-                default {
-                    // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-                    returndatacopy(0x0, 0x0, returndatasize)
-                    // return(fromMemAddress, sizeInBytes)
-                    return(0x0, returndatasize)
-                }
+        if (callSuccess) {
+            assembly {
+                // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+                returndatacopy(0x0, 0x0, returndatasize)
+                // return(fromMemAddress, sizeInBytes)
+                return(0x0, returndatasize)
+            }
         }
     }
+
+//    // Below was my initial attempt, but I removed a load of the assembly in favour of the above.
+//    // Copied mainly from a message in the Solidity gitter
+//    function () public {
+//
+//        // Could load this using assembly, although I think it's clearer when using standard Solidity
+//        address upgradableContractMem = upgradableContractAddress;
+//
+//        // Should test if we can get the calldata somehow without using assembly, perhaps with msg.data
+//        assembly {
+//            let freeMemAddress := mload(0x40)
+//            // mstore(memAddress, value)
+//            mstore(0x40, add(freeMemAddress, calldatasize))
+//            // calldatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+//            calldatacopy(freeMemAddress, 0x0, calldatasize)
+//
+//            // delegatecall(gasAllowed, callAddress, inMemAddress, inSizeBytes, outMemAddress, outSizeBytes) returns/pushes to stack (1 on success, 0 on failure)
+//            switch delegatecall(gas, upgradableContractMem, freeMemAddress, calldatasize, 0, 0)
+//                // revert(fromMemAddress, sizeInBytes) ends execution and returns value
+//                case 0 { revert(0x0, 0) }
+//                default {
+//                    // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+//                    returndatacopy(0x0, 0x0, returndatasize)
+//                    // return(fromMemAddress, sizeInBytes)
+//                    return(0x0, returndatasize)
+//                }
+//        }
+//    }
 }
