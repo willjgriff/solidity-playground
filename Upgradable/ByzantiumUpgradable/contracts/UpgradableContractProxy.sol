@@ -1,6 +1,9 @@
 pragma solidity ^0.4.18;
 
 // TODO: Should be ownable, by some multi-sig / dao.
+// Note this contract holds the storage the upgradable contracts will use.
+// Calling the contract's implementations directly will not effect this contracts storage and should have
+// no effect on the expected behaviour when properly using the upgradable contract through this proxy.
 contract UpgradableContractProxy {
 
     address private upgradableContractAddress;
@@ -19,15 +22,13 @@ contract UpgradableContractProxy {
 
         if (callSuccess) {
             assembly {
-                // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-                returndatacopy(0x0, 0x0, returndatasize)
-                // return(fromMemAddress, sizeInBytes)
-                return(0x0, returndatasize)
+                returndatacopy(0x0, 0x0, returndatasize) // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+                return(0x0, returndatasize) // return(fromMemAddress, sizeInBytes)
             }
         }
     }
 
-//    // Below was my initial attempt, but I removed a load of the assembly in favour of the above.
+    // Below was my initial attempt, but I removed a load of the assembly in favour of the above.
 //    // Copied mainly from a message in the Solidity gitter
 //    function () public {
 //
