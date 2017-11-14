@@ -59,6 +59,10 @@ const convertToPromise = functionWithCallbackParam => new Promise((resolve, reje
 const increaseTestRpcTime = (web3, seconds) =>
     web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [seconds], id: 0})
 
+const mineBlock = (web3) =>
+    web3.currentProvider.send({jsonrpc: '2.0', method: 'evm_mine', id: new Date().getTime()})
+
+
 module.exports = {
     assertThrowsMessage,
     assertThrows,

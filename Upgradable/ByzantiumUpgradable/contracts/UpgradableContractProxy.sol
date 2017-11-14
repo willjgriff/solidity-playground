@@ -1,19 +1,24 @@
 pragma solidity ^0.4.18;
 
-// TODO: Should be ownable, by some multi-sig / dao.
-// Note this contract holds the storage the upgradable contracts will use.
-// Calling the contract's implementations directly will not effect this contracts storage and should have
-// no effect on the expected behaviour when properly using the upgradable contract through this proxy.
-contract UpgradableContractProxy {
+import "./Ownable.sol";
 
-    // Implementation contracts should include this address at the first location in storage.
+/**
+ * Note this contract holds the storage the upgradable contracts will use.
+ * Calling the contract's implementations directly will not effect this contracts storage and should have
+ * no effect on the expected behaviour when properly using the upgradable contract through this proxy.
+ */
+contract UpgradableContractProxy is Ownable {
+
+    // Contracts at the upgradableContractAddress must reserve the first location in storage for this address as
+    // they will be called through this contract. This contract masquerades as the implementation to create a common
+    // location for storage of vars.
     address private upgradableContractAddress;
 
     function UpgradableContractProxy(address initialContractAddress) public {
         upgradableContractAddress = initialContractAddress;
     }
 
-    function setContractAddress(address newContractAddress) public {
+    function setContractAddress(address newContractAddress) public onlyOwner {
         upgradableContractAddress = newContractAddress;
     }
 
@@ -23,39 +28,13 @@ contract UpgradableContractProxy {
 
         if (callSuccess) {
             assembly {
-                returndatacopy(0x0, 0x0, returndatasize) // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-                return(0x0, returndatasize) // return(fromMemAddress, sizeInBytes)
+                // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
+                returndatacopy(0x0, 0x0, returndatasize)
+                // return(fromMemAddress, sizeInBytes)
+                return(0x0, returndatasize)
             }
         } else {
             revert();
         }
     }
-
-    // Below was my initial attempt, but I removed a load of the assembly in favour of the above.
-//    // Copied mainly from a message in the Solidity gitter
-//    function () public {
-//
-//        // Could load this using assembly, although I think it's clearer when using standard Solidity
-//        address upgradableContractMem = upgradableContractAddress;
-//
-//        // Should test if we can get the calldata somehow without using assembly, perhaps with msg.data
-//        assembly {
-//            let freeMemAddress := mload(0x40)
-//            // mstore(memAddress, value)
-//            mstore(0x40, add(freeMemAddress, calldatasize))
-//            // calldatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-//            calldatacopy(freeMemAddress, 0x0, calldatasize)
-//
-//            // delegatecall(gasAllowed, callAddress, inMemAddress, inSizeBytes, outMemAddress, outSizeBytes) returns/pushes to stack (1 on success, 0 on failure)
-//            switch delegatecall(gas, upgradableContractMem, freeMemAddress, calldatasize, 0, 0)
-//                // revert(fromMemAddress, sizeInBytes) ends execution and returns value
-//                case 0 { revert(0x0, 0) }
-//                default {
-//                    // returndatacopy(toMemAddress, fromMemAddress, sizeInBytes)
-//                    returndatacopy(0x0, 0x0, returndatasize)
-//                    // return(fromMemAddress, sizeInBytes)
-//                    return(0x0, returndatasize)
-//                }
-//        }
-//    }
 }
