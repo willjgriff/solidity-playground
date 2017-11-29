@@ -1,15 +1,17 @@
 pragma solidity ^0.4.18;
 
+import "./Ownable.sol";
+
 // TODO: Should be ownable, by some multi-sig / dao.
-contract UpgradableContractProxy {
+contract UpgradableContractProxyAssembly is Ownable {
 
     address private upgradableContractAddress;
 
-    function UpgradableContractProxy(address initialContractAddress) public {
+    function UpgradableContractProxyAssembly(address initialContractAddress) public {
         upgradableContractAddress = initialContractAddress;
     }
 
-    function setContractAddress(address newContractAddress) public {
+    function setContractAddress(address newContractAddress) public onlyOwner {
         upgradableContractAddress = newContractAddress;
     }
 

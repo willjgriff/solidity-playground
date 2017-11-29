@@ -5,6 +5,7 @@ import "./ContractInterface.sol";
 contract ContractV2 is ContractInterface {
 
     address private upgradableContractAddress;
+    address public owner;
 
     uint public storageValue;
     string public dynamicallySizedValue;

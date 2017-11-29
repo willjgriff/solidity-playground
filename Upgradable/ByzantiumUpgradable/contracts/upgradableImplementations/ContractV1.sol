@@ -5,9 +5,10 @@ import "./ContractInterface.sol";
 contract ContractV1 is ContractInterface {
 
     // Stored data actually lives in the UpgradableContractProxy. However the storage layout is specified here in the implementing contracts.
-    // The first and only variable in the UpgradableContractProxy is a reference to the address of this contract.
-    // Therefore the first reference in each contract using the UpgradableContractProxy must be set aside for this address.
+    // The first variable in the UpgradableContractProxy is a reference to the address of this contract, the second is the owner, from the inherited Ownable.sol.
+    // Therefore the first and second references in each contract using the UpgradableContractProxy must be set aside for these addresses.
     address private upgradableContractAddress;
+    address public owner;
 
     // The storage layout must remain the same in all the upgraded contracts, although it can be added to.
     // Note that besides the potential mess of unnecessary variables this could create over time, there isn't currently

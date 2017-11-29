@@ -2,6 +2,7 @@ const ContractInterface = artifacts.require("ContractInterface.sol")
 const ContractV1 = artifacts.require("ContractV1.sol")
 const ContractV2 = artifacts.require("ContractV2.sol")
 const UpgradableContractProxy = artifacts.require("UpgradableContractProxy.sol")
+const UpgradableContractProxyAssembly = artifacts.require("UpgradableContractProxyAssembly.sol")
 
 contract("UpgradableContractProxy", () => {
 
@@ -44,7 +45,7 @@ contract("UpgradableContractProxy", () => {
             await upgradableContract.setStorageValue(expectedValue)
             const actualValue = await upgradableContract.getStorageValue()
 
-            assert.equal(actualValue, expectedValue)
+            assert.equal(actualValue.toNumber(), expectedValue)
         })
 
         it("sets the storage var after upgrade", async () => {
@@ -53,7 +54,7 @@ contract("UpgradableContractProxy", () => {
             await upgradableContract.setStorageValue(5)
             const actualValue = await upgradableContract.getStorageValue()
 
-            assert.equal(actualValue, expectedValue)
+            assert.equal(actualValue.toNumber(), expectedValue)
         })
     })
 
