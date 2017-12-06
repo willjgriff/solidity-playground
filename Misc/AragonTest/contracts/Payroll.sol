@@ -17,15 +17,13 @@ contract Payroll is Ownable {
     uint256 public employeeCount;
     mapping (address => Employee) public employees;
     uint256 private totalYearlySalariesUsd;
-    uint256 public ethToUsd;
+    uint256 public usdTokenToWei;
     
     event LogEmployeeAdded(address employeeAddress);
     
     modifier onlyOracle() { require(msg.sender == oracleAddress); _; }
     
-    modifier isEmployee() { require(employees[msg.sender].yearlySalaryUsd > 0); _; }
-    
-    // modifier oneMonthSinceClaim() { require(employees[msg.sender].timeSalaryLastClaimed >))
+    modifier isEmployee(address employeeAddress) { require(employees[employeeAddress].yearlySalaryUsd > 0); _; }
     
     function Payroll(address initialOracleAddress) public {
         oracleAddress = initialOracleAddress;
@@ -37,28 +35,35 @@ contract Payroll is Ownable {
     
     // TODO: Enable use of multiple tokens.
     // function setExchangeRate(address token, uint256 usdExchangeRate) public onlyOracle {
-    function setExchangeRate(uint256 usdExchangeRate) public onlyOracle {
-        ethToUsd = usdExchangeRate;
+    function setExchangeRate(uint256 usdToEth) public onlyOracle {
+//        uint256 usdWeiToEth = usdToEth * (10 ** 18);
+//        uint256 usdWeiToWei = usdTokenToEth / (10 ** 18);
+        usdTokenToWei = usdToEth;
     }
 
-    function addEmployee(address employeeAddress, address[] allowedTokens, uint256 intialYearlySalaryUsd) public onlyOwner {
-        Employee memory employee = Employee(allowedTokens, intialYearlySalaryUsd, 0);
+    function addEmployee(address employeeAddress, address[] allowedTokens, uint256 initialYearlySalaryUsd) public onlyOwner {
+        uint256 yearlySalaryUsdToken = initialYearlySalaryUsd * (10 ** 18);
+        Employee memory employee = Employee(allowedTokens, yearlySalaryUsdToken, now);
         employees[employeeAddress] = employee;
         employeeCount++;
+        totalYearlySalariesUsd += initialYearlySalaryUsd;
         LogEmployeeAdded(employeeAddress);
     }
     
-    function setEmployeeSalary(address employeeAddress, uint256 yearlySalaryUsd) public onlyOwner {
+    function setEmployeeSalary(address employeeAddress, uint256 yearlySalaryUsd) public onlyOwner isEmployee(employeeAddress) {
         Employee storage employee = employees[employeeAddress];
+        totalYearlySalariesUsd -= employee.yearlySalaryUsd;
+        totalYearlySalariesUsd += yearlySalaryUsd;
         employee.yearlySalaryUsd = yearlySalaryUsd;
     }
     
-    function removeEmployee(address employeeAddress) public onlyOwner {
+    function removeEmployee(address employeeAddress) public onlyOwner isEmployee(employeeAddress) {
+        totalYearlySalariesUsd -= employees[employeeAddress].yearlySalaryUsd;
         delete employees[employeeAddress];
         employeeCount--;
     }
-    
-    function addEther() public payable onlyOwner {
+
+    function sendEther() public payable onlyOwner {
         // Throws if not the owner.
     }
     
@@ -66,34 +71,37 @@ contract Payroll is Ownable {
         owner.transfer(this.balance);
     }
     
-    function getEmployeeCount() public constant returns (uint256) {
-        return employeeCount;
-    }
-    
-    // TODO: Return more stuff
-    function getEmployee(address employeeAddress) public view returns (address, uint256) {
-        Employee storage employee = employees[employeeAddress];
-        return (employeeAddress, employee.yearlySalaryUsd);
-    }
-    
-    // TODO: Add / subtract to totalYearlySalariesUsd in add/set/remove employee functions
-    function calculateMonthlyPayout() public view returns (uint256) {
+    function calculateMonthlyPayoutUsd() public view returns (uint256) {
         return totalYearlySalariesUsd / 12;
     }
+
+    event Debug(uint totalSalariesUsdToken, uint dailyCostUsdToken, uint dailyCostWei, uint daysAvailable);
     
-    // Note this ignores leap years.
+    // This doesn't account for leap years or monthly payouts that are currently unclaimed.
     function calculateDaysOfFundingAvailable() public view returns (uint256) {
-        uint256 ethSpentPerDay = (totalYearlySalariesUsd / 365) * ethToUsd;
-        uint256 daysOfFundingAvailable = this.balance / ethSpentPerDay;
-        return daysOfFundingAvailable;
+        uint256 totalSalariesUsdToken = totalYearlySalariesUsd * (10 ** 18);
+        uint256 dailyCostUsdToken = totalSalariesUsdToken / 365;
+        uint256 dailyCostWei = dailyCostUsdToken / usdTokenToWei;
+        uint256 daysAvailable = this.balance / dailyCostWei;
+
+        Debug(totalSalariesUsdToken, dailyCostUsdToken, dailyCostWei, daysAvailable);
+
+        return daysAvailable;
     }
 
     // TODO: Implement to allow receiver to specify their distribution of salary between available tokens
     // function specifyTokenAllocation(address[] tokens, uint256[] distribution) public {
         
     // }
-    
-    function payday() public isEmployee {
+
+    // Employee can claim a payment one month after being added
+    function payday() public isEmployee(msg.sender) {
+        Employee storage employee = employees[msg.sender];
+        uint nextClaimTime = employee.timeSalaryLastClaimed + 730 hours; // 730 hours in a month.
+        require(now > nextClaimTime);
         
+        uint monthlyPayment = employee.yearlySalaryUsd / 12 * usdTokenToWei;
+        msg.sender.transfer(monthlyPayment);
+        employee.timeSalaryLastClaimed = nextClaimTime;
     }
 }
