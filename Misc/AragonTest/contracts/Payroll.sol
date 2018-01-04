@@ -4,7 +4,8 @@ pragma solidity ^0.4.18;
 // import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Ownable.sol";
 
-// Leap years aren't considered in this setup. 
+// Leap years aren't considered in this setup.
+// TODO: Extract constants!
 contract Payroll is Ownable {
 
     struct Employee {
@@ -45,20 +46,25 @@ contract Payroll is Ownable {
         uint256 yearlySalaryUsdToken = initialYearlySalaryUsd * (10 ** 18);
         Employee memory employee = Employee(allowedTokens, yearlySalaryUsdToken, now);
         employees[employeeAddress] = employee;
+
         employeeCount++;
         totalYearlySalariesUsd += initialYearlySalaryUsd;
+
         LogEmployeeAdded(employeeAddress);
     }
     
     function setEmployeeSalary(address employeeAddress, uint256 yearlySalaryUsd) public onlyOwner isEmployee(employeeAddress) {
         Employee storage employee = employees[employeeAddress];
+
         totalYearlySalariesUsd -= employee.yearlySalaryUsd;
         totalYearlySalariesUsd += yearlySalaryUsd;
+
         employee.yearlySalaryUsd = yearlySalaryUsd;
     }
     
     function removeEmployee(address employeeAddress) public onlyOwner isEmployee(employeeAddress) {
         totalYearlySalariesUsd -= employees[employeeAddress].yearlySalaryUsd;
+
         delete employees[employeeAddress];
         employeeCount--;
     }
@@ -75,16 +81,12 @@ contract Payroll is Ownable {
         return totalYearlySalariesUsd / 12;
     }
 
-    event Debug(uint totalSalariesUsdToken, uint dailyCostUsdToken, uint dailyCostWei, uint daysAvailable);
-    
     // This doesn't account for leap years or monthly payouts that are currently unclaimed.
     function calculateDaysOfFundingAvailable() public view returns (uint256) {
         uint256 totalSalariesUsdToken = totalYearlySalariesUsd * (10 ** 18);
         uint256 dailyCostUsdToken = totalSalariesUsdToken / 365;
         uint256 dailyCostWei = dailyCostUsdToken / usdTokenToWei;
         uint256 daysAvailable = this.balance / dailyCostWei;
-
-        Debug(totalSalariesUsdToken, dailyCostUsdToken, dailyCostWei, daysAvailable);
 
         return daysAvailable;
     }

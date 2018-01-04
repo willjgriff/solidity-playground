@@ -25,7 +25,7 @@ contract("Payroll", accounts => {
         })
     })
 
-    describe("setExchangeRate(uint256 usdExchangeRate)", () => {
+    describe("setExchangeRate(uint256 useToEth)", () => {
 
         it("converts usdToEth exchange rate to weiToUsd exchange rate", async () => {
             const usdToEth = 400
@@ -38,7 +38,7 @@ contract("Payroll", accounts => {
         })
     })
 
-    describe("addEmployee(address employeeAddress, address[] allowedTokens, uint256 intialYearlySalaryUsd)", () => {
+    describe("addEmployee(address employeeAddress, address[] allowedTokens, uint256 initialYearlySalaryUsd)", () => {
 
         it("adds an employee to mapping with correct details", async () => {
             const yearlySalaryUsd = 30000
@@ -118,8 +118,8 @@ contract("Payroll", accounts => {
 
         it("correctly calculates days of funding available", async () => {
             const etherBalance = 10
-            const weiBalance = etherBalance * (10 ** 18)
-            await payroll.sendEther( {value: web3.toWei(etherBalance, "ether") })
+            const weiBalance = web3.toWei(etherBalance, 'ether')
+            await payroll.sendEther( {value: weiBalance })
 
             const employeeSalaryUsd = 30000
             const employeeSalaryUsdToken = employeeSalaryUsd * (10 ** 18)
@@ -136,6 +136,13 @@ contract("Payroll", accounts => {
             const actualDaysAvailable = await payroll.calculateDaysOfFundingAvailable()
 
             assert.equal(actualDaysAvailable, expectedDaysAvailableFloor)
+        })
+    })
+
+    describe("payday()", () => {
+
+        it("pays employee correctly", async () => {
+
         })
     })
 })
