@@ -2,7 +2,7 @@ const ContractInterface = artifacts.require("ContractInterface.sol")
 const ContractV1 = artifacts.require("ContractV1.sol")
 const ContractV2 = artifacts.require("ContractV2.sol")
 const UpgradableContractProxy = artifacts.require("UpgradableContractProxy.sol")
-const UpgradableContractProxyAssembly = artifacts.require("UpgradableContractProxyAssembly.sol")
+// const UpgradableContractProxy = artifacts.require("UpgradableContractProxyAssembly.sol")
 
 contract("UpgradableContractProxy", () => {
 
