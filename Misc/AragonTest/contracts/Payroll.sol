@@ -1,12 +1,12 @@
 pragma solidity ^0.4.18;
 
-//import "./PayrollInterface.sol";
+import "./PayrollInterface.sol";
 // import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Ownable.sol";
 
 // Leap years aren't considered in this setup.
 // TODO: Extract constants!
-contract Payroll is Ownable {
+contract Payroll is Ownable, PayrollInterface {
 
     struct Employee {
         address[] allowedTokens;
@@ -64,9 +64,8 @@ contract Payroll is Ownable {
     
     function removeEmployee(address employeeAddress) public onlyOwner isEmployee(employeeAddress) {
         totalYearlySalariesUsd -= employees[employeeAddress].yearlySalaryUsd;
-
-        delete employees[employeeAddress];
         employeeCount--;
+        delete employees[employeeAddress];
     }
 
     function sendEther() public payable onlyOwner {

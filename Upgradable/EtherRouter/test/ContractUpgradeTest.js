@@ -3,7 +3,6 @@ const ContractV1 = artifacts.require("./ContractV1.sol")
 const ContractV2 = artifacts.require("./ContractV2.sol")
 const Resolver = artifacts.require("./Resolver.sol")
 const EtherRouter = artifacts.require("./EtherRouter.sol")
-const TestUtils = require("../../../TestUtils.js")
 
 contract("Contracts adhering to ContractInterface", () => {
 

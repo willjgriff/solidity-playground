@@ -25,6 +25,29 @@ const assertThrowsMessage = (contractMethodCall, maxGasAvailable, assertMessage)
         })
 }
 
+const assertThrowsSinceByzantium = (contractMethodCall) => {
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(contractMethodCall())
+        } catch (error) {
+            reject(error)
+        }
+    })
+        .then(transaction => {
+            // This asserts the mined transaction has failed, this occurs on live chains
+            // or when a transaction is successful on testrpc.
+            assert.equal(transaction.receipt.status, 0, "Transaction successful, test fails")
+        })
+        .catch(error => {
+            // On testrpc a failed transaction is not mined but creates an error instead.
+            // This checks for the term "revert" in the error and ignores it if it contains
+            // it, declaring the test successful. It will throw any other errors.
+            if ((error + "").indexOf("revert") < 0) {
+                throw error
+            }
+        })
+}
+
 const assertEventFired = (tx, event) => {
     assert.isTrue(isEventLogInTransaction(tx, event), `Event ${event} was not fired`)
 }
@@ -66,6 +89,7 @@ const mineBlock = (web3) =>
 module.exports = {
     assertThrowsMessage,
     assertThrows,
+    assertThrowsSinceByzantium,
     assertEventFired,
     listenForEvent,
     convertToPromise,
