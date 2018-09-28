@@ -8,7 +8,8 @@ import "zeppelin-solidity/contracts/token/StandardToken.sol";
  * @notice Currently proposed standard implementation of ERC223 Token.
  *         Differences to ERC20:
  *         Checks if the receiver is a contract address during tx's and if so checks it can handle the funds.
- *         Allows submitting of encoded function calls to the receiving address if it's a contract.
+ *         Allows submitting of encoded function calls to the receiving address if it's a contract. Removing
+ *         the need to execute multiple transactions for each of the token and receiving contract.
  */
 contract StandardERC223Token is ERC223, StandardToken {
 

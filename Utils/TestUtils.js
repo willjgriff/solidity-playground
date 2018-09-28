@@ -48,6 +48,20 @@ const assertThrowsSinceByzantium = (contractMethodCall) => {
         })
 }
 
+// Example usage: await assertRevertWithMessage(() => testDynamicType.revertWithReason(), "error occurred")
+async function assertRevertWithMessage(transactionFunction, expectedErrorMessage) {
+    try {
+        transaction = await transactionFunction()
+        assert.isFalse(transaction.receipt.status, "Transaction was successful but should have failed")
+    } catch (error) {
+        if ((error + "").indexOf("revert") < 0) {
+            throw error
+        } else {
+            assert.equal(error.reason, expectedErrorMessage)
+        }
+    }
+}
+
 const assertEventFired = (tx, event) => {
     assert.isTrue(isEventLogInTransaction(tx, event), `Event ${event} was not fired`)
 }
@@ -90,6 +104,7 @@ module.exports = {
     assertThrowsMessage,
     assertThrows,
     assertThrowsSinceByzantium,
+    assertRevertWithMessage,
     assertEventFired,
     listenForEvent,
     convertToPromise,

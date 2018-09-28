@@ -6,7 +6,7 @@ Token and token related contracts.
 Basic implementation of the current ERC721 token proposal. Currently unfinished, still experimenting.
 
 ### ERC223
-Basic implementation of the current ERC223 token proposal with minimal tests for experimentation. Largely copied from Aragon's implementation here: https://github.com/aragon/ERC23. Demonstrates how to call functions using byte/hex encoded function calls.
+Basic implementation of the current ERC223 token proposal with minimal tests for experimentation. Largely copied from Aragon's implementation here: https://github.com/aragon/ERC23. Demonstrates how to call functions using byte/hex encoded function calls. Useful because it allows submitting of encoded function calls to the receiving address if it's a contract which removes the need to execute multiple transactions for each of the token and receiving contract. Also prevents funds from being sent to contracts that can't handle them.
 
 ### MiniMeTesting
 Playing with the Giveth MiniMeToken from https://github.com/Giveth/minime with some basic tests to understand its functionality.
