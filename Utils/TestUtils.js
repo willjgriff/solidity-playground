@@ -48,10 +48,10 @@ const assertThrowsSinceByzantium = (contractMethodCall) => {
         })
 }
 
-// Example usage: await assertRevertWithMessage(() => testDynamicType.revertWithReason(), "error occurred")
+// Example usage: await assertRevertWithMessage(testDynamicType.revertWithReason(), "error occurred")
 async function assertRevertWithMessage(transactionFunction, expectedErrorMessage) {
     try {
-        transaction = await transactionFunction()
+        transaction = await transactionFunction
         assert.isFalse(transaction.receipt.status, "Transaction was successful but should have failed")
     } catch (error) {
         if ((error + "").indexOf("revert") < 0) {
@@ -70,6 +70,19 @@ const isEventLogInTransaction = (tx, event) => {
     return tx.logs
         .filter(log => log.event === event)
         .length > 0
+}
+
+const assertEventArgumentCorrect = (transaction, eventName, eventArgKey, eventArgValue) => {
+    assert.isTrue(doEventArgumentsContainFieldWithValue(transaction, eventName, eventArgKey, eventArgValue),
+        `Event "${eventName}" does not contain key "${eventArgKey}" with value "${eventArgValue}"`)
+}
+
+const doEventArgumentsContainFieldWithValue = (transaction, eventName, eventArgKey, _eventArgValue) => {
+    return transaction.logs
+            .filter(log => log.event === eventName)
+            .map(log => log.args[eventArgKey])
+            .filter(eventArgValue => eventArgValue === _eventArgValue)
+            .length > 0
 }
 
 const listenForEvent = event => new Promise((resolve, reject) => {

@@ -74,12 +74,13 @@ contract("UpgradableContractProxy", () => {
         it("returns expected value after upgrading to contractV2", async () => {
             const expectedValue = [0, 1, 2]
             await upgradableContractProxy.setContractAddress(contractV2.address)
-            const noInterfaceUpgradableContract = ContractV2.at(upgradableContractProxy.address)
+            const noInterfaceUpgradableContract = await ContractV2.at(upgradableContractProxy.address)
 
             await noInterfaceUpgradableContract.setDynamicallySizedValue(expectedValue)
             const actualValue = await noInterfaceUpgradableContract.getUpdatedDynamicallySizedValue()
 
             assert.equal(actualValue.length, 3)
+            // assert.deepEqual()?
             assert.equal(actualValue[0], expectedValue[0])
             assert.equal(actualValue[1], expectedValue[1])
             assert.equal(actualValue[2], expectedValue[2])
