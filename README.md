@@ -29,6 +29,8 @@ These are primarily for personal development, in order of when I wrote them (the
 - Fallback Storage Access Test
 
 ### Misc:
+- MetaTransactions
+- Aragon Test
 - Assembly Experiments
 - Zeppelin Ethernaut
 - Ipfs Experiment 
