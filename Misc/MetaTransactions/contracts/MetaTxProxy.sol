@@ -4,20 +4,33 @@ import "./ECTools.sol";
 
 contract MetaTxProxy {
 
-    address public signer;
+    address public _signer;
 
     constructor() public {
-        signer = msg.sender;
+        _signer = msg.sender;
     }
 
-    function getHashOf() pure public returns (bytes32) {
-        return keccak256(abi.encodePacked("Hola"));
+    event BasicSendSuccessful(address receiver, uint256 value);
+
+    function () payable {}
+
+    function getHashOf(address receiver, uint256 value) pure public returns (bytes32) {
+        return keccak256(abi.encodePacked(receiver, value));
     }
 
-    function getSigner(bytes32 message, bytes signature) pure public returns (address) {
+    function getSigner(bytes32 messageHash, bytes signature) pure public returns (address) {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 prefixedMessage = keccak256(prefix, message);
+        bytes32 prefixedMessage = keccak256(prefix, messageHash);
         return ECTools.recover(prefixedMessage, signature);
+    }
+
+    function basicSend(address receiver, uint256 value, bytes signature) public {
+        bytes32 messageHash = getHashOf(receiver, value);
+        address signer = getSigner(messageHash, signature);
+        if (signer == _signer) {
+            receiver.send(value);
+            emit BasicSendSuccessful(receiver, value);
+        }
     }
 
 }
