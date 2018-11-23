@@ -15,6 +15,7 @@ contract("MetaTxProxy", accounts => {
     const oneEthWeiValue = web3.utils.toWei('1', 'ether')
     const emptyTransactionData = "0x00"
     const zeroRelayerReward = 0
+    const zeroNonce = 0
 
     beforeEach(async () => {
         ecTools = await EcTools.new()
@@ -46,7 +47,7 @@ contract("MetaTxProxy", accounts => {
             const signatureOfMessageHash = await web3.eth.sign(messageHashToSign, signingAccount)
 
             await metaTxProxy.executeTransaction(receiverAccount, oneEthWeiValue, emptyTransactionData,
-                zeroRelayerReward, signatureOfMessageHash, {from: relayAccount})
+                zeroRelayerReward, zeroNonce, signatureOfMessageHash, {from: relayAccount})
 
             const actualBalance = await web3.eth.getBalance(receiverAccount)
             assert.equal(actualBalance.toString(), expectedBalance.toString())
@@ -57,9 +58,9 @@ contract("MetaTxProxy", accounts => {
             const signatureOfMessageHash = await web3.eth.sign(messageHashToSign, signingAccount)
 
             await metaTxProxy.executeTransaction(receiverAccount, oneEthWeiValue, emptyTransactionData,
-                zeroRelayerReward, signatureOfMessageHash, {from: relayAccount})
+                zeroRelayerReward, zeroNonce, signatureOfMessageHash, {from: relayAccount})
             await shouldFail.reverting(metaTxProxy.executeTransaction(
-                receiverAccount, oneEthWeiValue, emptyTransactionData, zeroRelayerReward, signatureOfMessageHash, {from: relayAccount}))
+                receiverAccount, oneEthWeiValue, emptyTransactionData, zeroRelayerReward, zeroNonce, signatureOfMessageHash, {from: relayAccount}))
         })
 
         it("executes transaction on external contract", async () => {
@@ -69,7 +70,7 @@ contract("MetaTxProxy", accounts => {
             const signatureOfTransactionHash = await web3.eth.sign(transactionHashToSign, signingAccount)
 
             await metaTxProxy.executeTransaction(externalContract.address, 0, transactionData,
-                zeroRelayerReward, signatureOfTransactionHash, {from: relayAccount})
+                zeroRelayerReward, zeroNonce, signatureOfTransactionHash, {from: relayAccount})
 
             const actualValue = await externalContract._value()
             assert.equal(actualValue, expectedValue)
@@ -84,7 +85,7 @@ contract("MetaTxProxy", accounts => {
             const signatureOfTransactionHash = await web3.eth.sign(transactionHashToSign, signingAccount)
 
             const transaction = await metaTxProxy.executeTransaction(receiverAccount, oneEthWeiValue,
-                emptyTransactionData, reward, signatureOfTransactionHash, {from: relayAccount, gasPrice: gasCost})
+                emptyTransactionData, reward, zeroNonce, signatureOfTransactionHash, {from: relayAccount, gasPrice: gasCost})
 
             const transactionCost = transaction.receipt.gasUsed * gasCost
             expectedBalance = expectedBalance.sub(new BN(transactionCost))
