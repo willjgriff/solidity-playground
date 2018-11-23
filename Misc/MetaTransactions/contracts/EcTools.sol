@@ -1,6 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.25;
 
-library ECTools {
+library EcTools {
 
   /**
    * @dev Recover signer address from a message by using his signature
@@ -39,7 +39,7 @@ library ECTools {
 
   function toEthereumSignedMessage(bytes32 _msg) public view returns (bytes32) {
     bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-    return keccak256(prefix, _msg);
+    return keccak256(abi.encodePacked(prefix, _msg));
   }
 
   function prefixedRecover(bytes32 _msg, bytes sig) public view returns (address) {
