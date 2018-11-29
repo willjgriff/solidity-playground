@@ -8,6 +8,10 @@ contract MetaTxProxy {
     // This doesn't work as a user may want to submit the same transaction twice. Should be a mapping to a nonce.
     mapping(bytes32 => uint256) public _transactionHashNonce;
 
+    // For enabling the relayer to deploy the contract see:
+    // https://medium.com/limechain/part-two-second-layer-solutions-a-journey-into-meta-transactions-counterfactual-instantiation-b3758507af03
+    // Also useful to understand how to do counterfactual instantiation using ethers lib
+    // Counterfactual instantiation process also described here: https://medium.com/gitcoin/counterfactual-loan-repayment-828a59d9b730
     constructor() public {
         _signer = msg.sender;
     }
