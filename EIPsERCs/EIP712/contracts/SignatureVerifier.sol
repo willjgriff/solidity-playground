@@ -5,7 +5,7 @@ import "./EcTools.sol";
 
 /**
  * Copied from MetaMask's example code for EIP 712.
- * Modified to enable verification of non-hardcoded externally signed bid through "verifySpecific(bid, signature)"
+ * Modified to enable verification of non-hardcoded externally signed bid through "verifySpecific(bid, signature)" functions
  */
 contract SignatureVerifier {
 
@@ -78,7 +78,11 @@ contract SignatureVerifier {
         return signer == ecrecover(hashBid(bid), sigV, sigR, sigS);
     }
 
-    function verifySpecific(Bid memory bid, bytes memory signature) public pure returns (address) {
+    function verifySpecificWithPrefix(Bid memory bid, bytes memory signature) public pure returns (address) {
         return EcTools.prefixedRecover(hashBid(bid), signature);
+    }
+
+    function verifySpecificWithoutPrefix(Bid memory bid, bytes memory signature) public pure returns (address) {
+        return EcTools.recover(hashBid(bid), signature);
     }
 }
