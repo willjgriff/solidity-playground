@@ -1,0 +1,6 @@
+# EIP / ERC experiments
+
+Basic usage / investigation of some EIP / ERC standards
+
+### EIP 712 Structured data signing
+This enables better UX when signing data. Prior to this EIP data that is signed would typically be byte strings which is unreadable. Using this EIP we can submit json looking objects with meaningful names and values for signing and verification.

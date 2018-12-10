@@ -12,7 +12,7 @@ These are primarily for personal development, in order of when I wrote them (the
 - Basic Escrow
 
 ### Tokens:
-- ERC223
+- ERC 223
 - MiniMe Testing
 - Youtube Token (uses Oraclize)
 
@@ -28,8 +28,11 @@ These are primarily for personal development, in order of when I wrote them (the
 - Zeppelin Upgradable Proxy
 - Fallback Storage Access Test
 
+### EIPs/ERCs
+- EIP 712 (Structured data signing)
+
 ### Misc:
-- MetaTransactions
+- Meta Transactions
 - Aragon Test
 - Assembly Experiments
 - Zeppelin Ethernaut

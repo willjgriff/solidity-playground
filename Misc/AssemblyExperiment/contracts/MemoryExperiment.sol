@@ -2,6 +2,8 @@ pragma solidity ^0.5.0;
 
 // Code used to investigate data location references, copied into and experimented with in remix using the live compiler.
 // Doesn't actually do anything and hasn't been tested. Kept here for future reference.
+// Note, the stack is often talked about but I can't find any way of explicitly accessing the stack outside of assembly.
+// In a way all operations access the stack
 contract MemoryExperiment {
 
     uint[] _storageArray;
