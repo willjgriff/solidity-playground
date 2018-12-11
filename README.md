@@ -30,6 +30,7 @@ These are primarily for personal development, in order of when I wrote them (the
 
 ### EIPs/ERCs
 - EIP 712 (Structured data signing)
+- EIP 165 (Contract interface detection)
 
 ### Misc:
 - Meta Transactions
