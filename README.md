@@ -32,7 +32,7 @@ These are primarily for personal development, in order of when I wrote them (the
 - EIP 712 (Structured data signing)
 - EIP 165 (Contract interface detection)
 
-## Misc:
+### Misc:
 - Ipfs Experiment 
 - Zeppelin Ethernaut
 - Assembly Experiments
