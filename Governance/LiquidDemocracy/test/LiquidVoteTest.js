@@ -11,10 +11,10 @@ contract("LiquidVote", accounts => {
 
     beforeEach(async () => {
         miniMeTokenFactory = await MiniMeTokenFactory.new()
-        voteToken = await MiniMeToken.new(miniMeTokenFactory.address, 0, 0, "Vote Token", 18, "VTT", true)
+        voteToken = await MiniMeToken.new(miniMeTokenFactory.address, "0x0000000000000000000000000000000000000000", 0, "Vote Token", 18, "VTT", true)
 
         DelegationRegistry.link("ArrayLib", ArrayLib.address)
-        delegationRegistry = await DelegationRegistry.new()
+        delegationRegistry = await DelegationRegistry.new("0x0000000000000000000000000000000000000000")
 
         LiquidVote.link("ArrayLib", ArrayLib.address)
         liquidVote = await LiquidVote.new(voteToken.address, delegationRegistry.address)

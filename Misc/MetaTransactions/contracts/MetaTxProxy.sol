@@ -5,7 +5,7 @@ import "./EcTools.sol";
 contract MetaTxProxy {
 
     address public _signer;
-    // This doesn't work as a user may want to submit the same transaction twice. Should be a mapping to a nonce.
+
     mapping(bytes32 => uint256) public _transactionHashNonce;
 
     // For enabling the relayer to deploy the contract see:

@@ -10,7 +10,7 @@ contract("DelegationRegistry", accounts => {
 
     beforeEach(async () => {
         DelegationRegistry.link("ArrayLib", ArrayLib.address)
-        delegationRegistry = await DelegationRegistry.new()
+        delegationRegistry = await DelegationRegistry.new("0x0000000000000000000000000000000000000000")
     })
 
     describe("delegateVote(address delegateToAddress, uint previousNodePosition)", () => {

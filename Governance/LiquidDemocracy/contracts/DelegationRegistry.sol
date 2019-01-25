@@ -17,7 +17,9 @@ contract DelegationRegistry {
 
     struct DelegatedVoter {
         address toAddress;
+        // The index of this DelegatedVoters address in the fromAddresses array of the toAddress DelegatedVoter
         uint toAddressFromAddressesIndex;
+        // This array should be a linked list, then I think we can get rid of the above uint
         address[] fromAddresses;
         // Maybe can be replaced with block number
         bool ignoreParentRegistry;
