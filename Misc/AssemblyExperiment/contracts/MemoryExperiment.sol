@@ -52,9 +52,10 @@ contract MemoryExperiment {
         // memoryString.length; This can't be done, string doesn't have length or index access
 
 
-        bytes memory memoryBytes = new bytes(32);
+        bytes memory memoryBytes = new bytes(32); // Dynamically sized byte array, similar to byte[] but packed tightly in call data. Not dynamically sized when in memory, only in storage.
         bytes storage storageBytes = _storageStruct.someBytes;
-        bytes2 memoryBytesFixed = 0xABCD;
+        bytes1 memoryBytesFixed1 = 0xAB;
+        bytes2 memoryBytesFixed2 = 0xABCD;
 
         memoryBytes.length;
         storageBytes.length = 123;
