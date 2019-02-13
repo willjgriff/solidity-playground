@@ -1,4 +1,4 @@
-pragma solidity ^0.5.1;
+pragma solidity ^0.4.24;
 
 import "./DelegationTree.sol";
 import "./VoteToken.sol";
@@ -6,6 +6,10 @@ import "./VoteToken.sol";
 // Ideally we would use the Voting app, however the total vote weight calculation can only be called as an external view function.
 // This is due to it's likely high cost of execution, outside the range of the block gas limit. The Voting app assumes this can be
 // executed on chain. Although you can't use the result on chain, end users can still see the result and use it to inform decisions.
+
+// Requires the use of either the MiniMeToken with checkpointing or evm-storage-proofs as outlined here: https://github.com/aragon/evm-storage-proofs
+// to lock the current balances of a token at a particular block, for use in calculating the total. If using the evm-storage-proofs, proofs must be
+// submitted and verified when a voter creates a delegation and the root voter must submit a proof when voting.
 contract DelegatedVote {
 
     using ArrayLib for address[];
