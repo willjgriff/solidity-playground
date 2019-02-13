@@ -41,7 +41,7 @@ contract("LiquidVote", accounts => {
             assert.isTrue(voter2[2], "Has voted bool not as expected")
         })
 
-        it("updates voted for address array", async () => {
+        it("updates voted 'for' address array", async () => {
             await liquidVote.vote(true, {from:accounts[0]})
             await liquidVote.vote(true, {from:accounts[1]})
             const expectedVotedForAddresses = [accounts[0], accounts[1]]
@@ -50,7 +50,7 @@ contract("LiquidVote", accounts => {
             assert.deepEqual(actualVotedForAddresses, expectedVotedForAddresses, "Voted for addresses are not as expected")
         })
 
-        it("updates voted against address array", async () => {
+        it("updates voted 'against' address array", async () => {
             await liquidVote.vote(false, {from:accounts[0]})
             await liquidVote.vote(false, {from:accounts[1]})
             const expectedVotedForAddresses = [accounts[0], accounts[1]]
@@ -59,7 +59,7 @@ contract("LiquidVote", accounts => {
             assert.deepEqual(actualVotedForAddresses, expectedVotedForAddresses, "Voted for addresses are not as expected")
         })
 
-        it("removes address from voted for address array when vote is changed", async () => {
+        it("removes address from voted 'for' address array when vote is changed", async () => {
             await liquidVote.vote(true, {from:accounts[0]})
             await liquidVote.vote(false, {from:accounts[0]})
             const votedForAddresses = await liquidVote.getVotedForAddresses();
@@ -69,7 +69,7 @@ contract("LiquidVote", accounts => {
             assert.deepEqual(votedAgainstAddresses, [accounts[0]], "Voted against addresses are not as expected")
         })
 
-        it("removes address from voted against address array when vote is changed", async () => {
+        it("removes address from voted 'against' address array when vote is changed", async () => {
             await liquidVote.vote(false, {from:accounts[0]})
             await liquidVote.vote(true, {from:accounts[0]})
             const votedForAddresses = await liquidVote.getVotedForAddresses();

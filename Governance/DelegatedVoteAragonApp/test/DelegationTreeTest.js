@@ -12,13 +12,13 @@ contract("DelegationTree", accounts => {
         delegationTree = await DelegationTree.new()
     })
 
-    describe("delegateVote", () => {
+    describe("delegateVote(address _delegateTo)", () => {
 
         it("sets delegateTo address of sender to specified address", async () => {
             await delegationTree.delegateVote(delegateTo)
 
-            const delegatedVoter = await delegationTree.delegateVoters(delegateFrom)
-            assert.equal(delegatedVoter.delegateTo, delegateTo)
+            const delegateVoter = await delegationTree.delegateVoters(delegateFrom)
+            assert.equal(delegateVoter.delegateTo, delegateTo)
         })
 
         it("adds to delegateFrom list of delegateTo", async () => {
@@ -26,8 +26,8 @@ contract("DelegationTree", accounts => {
 
             await delegationTree.delegateVote(delegateTo)
 
-            const delegatedVotersList = await delegationTree.getDelegatedFromVotersForAddress(delegateTo)
-            assert.deepEqual(delegatedVotersList, expectedVotersList)
+            const delegateVotersList = await delegationTree.getDelegatedFromVotersForAddress(delegateTo)
+            assert.deepEqual(delegateVotersList, expectedVotersList)
         })
 
         it("prevents circular delegation to self", async () => {
@@ -41,17 +41,37 @@ contract("DelegationTree", accounts => {
         })
     })
 
-    describe("undelegateVote", () => {
+    describe("undelegateVote()", () => {
 
-        it("")
+        it("removes delegation of specified address and updates from voters", async () => {
+            await delegationTree.delegateVote(delegateTo)
+            const expectedFromVoters = []
+
+            await delegationTree.undelegateVote()
+
+            const fromDelegateVoter = await delegationTree.delegateVoters(delegateFrom)
+            const toDelegateVoterFromVoters = await delegationTree.getDelegatedFromVotersForAddress(delegateTo)
+            assert.equal(fromDelegateVoter.delegateTo, 0)
+            assert.deepEqual(toDelegateVoterFromVoters, expectedFromVoters)
+        })
+
+        it("updates the moved voters from voters index", async () => {
+            await createDelegations([[0, 3], [1, 3], [2, 3]])
+
+            await delegationTree.undelegateVote({ from: accounts[1] })
+
+            const movedDelegateVoter = await delegationTree.delegateVoters(accounts[2])
+            assert(movedDelegateVoter.delegatedFromAddressesIndex, 1)
+        })
     })
 
-    describe("voteWeightOfAddress", () => {
+    describe("voteWeightOfAddress(address _address, IERC20 _token)", () => {
 
         let voteToken
+        const tokenCreator = accounts[9]
 
         beforeEach(async () => {
-            voteToken = await VoteToken.new({ from: accounts[9] })
+            voteToken = await VoteToken.new({ from: tokenCreator })
         })
 
         it("calculates correct weight when delegation tree is a single address", async () => {
@@ -94,7 +114,7 @@ contract("DelegationTree", accounts => {
         // Use RxJs for these...
         distributeTokens = async numberOfAccounts => {
             Array.from(new Array(numberOfAccounts).keys())
-                .forEach(async i => await voteToken.transfer(accounts[i], i + 1, { from: accounts[9] }))
+                .forEach(async i => await voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
         }
     })
 
