@@ -5,7 +5,7 @@ import "./VoteToken.sol";
 
 // Ideally we would use the Voting app, however the total vote weight calculation can only be called as an external view function.
 // This is due to it's likely high cost of execution, outside the range of the block gas limit. The Voting app assumes this can be
-// executed on chain. Although you can't use the result on chain, we can make an alternative where the vote weight is calculated by every user.
+// executed on chain. Although you can't use the result on chain, end users can still see the result and use it to inform decisions.
 contract DelegatedVote {
 
     using ArrayLib for address[];
@@ -72,7 +72,7 @@ contract DelegatedVote {
         }
     }
 
-    function _updateVoteArrayAndIndices(address[] memory voteArray, uint256 voteArrayPosition) public {
+    function _updateVoteArrayAndIndices(address[] memory voteArray, uint256 voteArrayPosition) private {
         if (voteArray.length > 0) {
             address movedVoterAddress = voteArray[voteArrayPosition];
             Voter storage movedVoter = voters[movedVoterAddress];
@@ -81,16 +81,19 @@ contract DelegatedVote {
     }
 
     function totalVotedFor() public view returns (uint) {
+        return _totalVotedWeight(votedFor);
+    }
+
+    function totalVotedAgainst() public view returns (uint) {
+        return _totalVotedWeight(votedAgainst);
+    }
+
+    function _totalVotedWeight(address[] memory voteArray) private view returns (uint) {
         uint256 totalWeight = 0;
 
-        for (uint256 i = 0; i < votedFor.length; i++) {
-            totalWeight += delegationTree.voteWeightOfAddress(votedFor[i], voteToken);
+        for (uint256 i = 0; i < voteArray.length; i++) {
+            totalWeight += delegationTree.voteWeightOfAddress(voteArray[i], voteToken);
         }
         return totalWeight;
     }
-
-//    function totalVotedAgainst() public view returns (uint) {
-//
-//    }
-
 }

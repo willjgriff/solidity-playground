@@ -1,6 +1,8 @@
 const DelegationTree = artifacts.require("DelegationTree.sol")
 const VoteToken = artifacts.require("VoteToken.sol")
 const { assertRevert } = require("./helpers/assertThrow")
+const { range, from } = require("rxjs");
+const { mergeMap, map } = require("rxjs/operators")
 
 contract("DelegationTree", accounts => {
 
@@ -35,7 +37,7 @@ contract("DelegationTree", accounts => {
         })
 
         it("prevents circular delegation with many voters", async () => {
-            await createDelegations([[0, 1], [1, 2], [2, 3]])
+            await createDelegations$([[0, 1], [1, 2], [2, 3]]).toPromise()
 
             await assertRevert(async () => await delegationTree.delegateVote(accounts[0], {from: accounts[3]}))
         })
@@ -56,7 +58,7 @@ contract("DelegationTree", accounts => {
         })
 
         it("updates the moved voters from voters index", async () => {
-            await createDelegations([[0, 3], [1, 3], [2, 3]])
+            await createDelegations$([[0, 3], [1, 3], [2, 3]]).toPromise()
 
             await delegationTree.undelegateVote({ from: accounts[1] })
 
@@ -76,7 +78,7 @@ contract("DelegationTree", accounts => {
 
         it("calculates correct weight when delegation tree is a single address", async () => {
             const expectedWeight = 1
-            await distributeTokens(1)
+            await distributeTokens$(1).toPromise()
 
             const actualWeight = await delegationTree.voteWeightOfAddress(accounts[0], voteToken.address)
 
@@ -100,8 +102,8 @@ contract("DelegationTree", accounts => {
 
         function delegationTreeTest(testCase) {
             it("calculates correct weight for delegations " + testCase.delegationsList, async () => {
-                await distributeTokens(testCase.numberOfAccounts)
-                await createDelegations(testCase.delegationsList)
+                await distributeTokens$(testCase.numberOfAccounts).toPromise()
+                await createDelegations$(testCase.delegationsList).toPromise()
 
                 const actualWeight = await delegationTree.voteWeightOfAddress(accounts[testCase.rootDelegate], voteToken.address)
 
@@ -111,25 +113,15 @@ contract("DelegationTree", accounts => {
 
         delegationTreeTestCases.forEach(testCase => delegationTreeTest(testCase))
 
-        // Use RxJs for these...
-        distributeTokens = async numberOfAccounts => {
-            Array.from(new Array(numberOfAccounts).keys())
-                .forEach(async i => await voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
-        }
+        const distributeTokens$ = (numberOfAccounts) => range(0, numberOfAccounts).pipe(
+            mergeMap(i => voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
+        )
     })
 
-    createDelegations = async delegationsList => {
-        delegationsList
-            .map(tuple => new Delegation(tuple[0], tuple[1]))
-            .map(delegation => {
-                delegation.delegateFrom = accounts[delegation.delegateFrom]
-                delegation.delegateTo = accounts[delegation.delegateTo]
-                return delegation
-            })
-            .forEach(async delegation => {
-                await delegationTree.delegateVote(delegation.delegateTo, { from: delegation.delegateFrom })
-            })
-    }
+    const createDelegations$ = (delegationsList) => from(delegationsList).pipe(
+        map(tuple => new Delegation(accounts[tuple[0]], accounts[tuple[1]])),
+        mergeMap(delegation => delegationTree.delegateVote(delegation.delegateTo, { from: delegation.delegateFrom }))
+    )
 
     function Delegation(delegateFrom, delegateTo) {
         this.delegateFrom = delegateFrom

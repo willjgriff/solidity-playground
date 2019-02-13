@@ -3,7 +3,7 @@ const DelegationTree = artifacts.require("DelegationTree.sol")
 const DelegatedVote = artifacts.require("DelegatedVote.sol")
 const { assertRevert } = require("./helpers/assertThrow")
 const { range, from } = require("rxjs")
-const { mergeMap, concat, merge } = require("rxjs/operators")
+const { mergeMap } = require("rxjs/operators")
 
 contract("DelegatedVote", accounts => {
 
@@ -85,33 +85,84 @@ contract("DelegatedVote", accounts => {
 
         it("calculates correct weight for one voter", async () => {
             const expectedWeightFor = 1
-            await doVote$(true, 1).pipe(
-                merge(distributeTokens$(1)),
-            ).toPromise()
+            await distributeTokens$(1).toPromise()
+            await doVote$(true, 1).toPromise()
 
             const actualWeightFor = await delegatedVote.totalVotedFor()
 
             assert.equal(actualWeightFor, expectedWeightFor)
         })
 
-        // it("calculates correct weight for many voters", async () => {
-        //     const expectedWeightFor = 6
-        //     doVote$(true, 3).subscribe()
-        //     distributeTokens$(3).subscribe()
-        //
-        //     const actualWeightFor = await delegatedVote.totalVotedFor();
-        //
-        //     assert.equal(actualWeightFor, expectedWeightFor)
-        // })
+        it("calculates correct weight for many voters", async () => {
+            const expectedWeightFor = 6
+            await distributeTokens$(3).toPromise()
+            await doVote$(true, 3).toPromise()
 
+            const actualWeightFor = await delegatedVote.totalVotedFor();
+
+            assert.equal(actualWeightFor, expectedWeightFor)
+        })
     })
+
+    describe("totalVotedAgainst()", () => {
+
+        it("calculates correct weight for one voter", async () => {
+            const expectedWeightFor = 1
+            await distributeTokens$(1).toPromise()
+            await doVote$(false, 1).toPromise()
+
+            const actualWeightFor = await delegatedVote.totalVotedAgainst()
+
+            assert.equal(actualWeightFor, expectedWeightFor)
+        })
+
+        it("calculates correct weight for many voters", async () => {
+            const expectedWeightFor = 6
+            await distributeTokens$(3).toPromise()
+            await doVote$(false, 3).toPromise()
+
+            const actualWeightFor = await delegatedVote.totalVotedAgainst();
+
+            assert.equal(actualWeightFor, expectedWeightFor)
+        })
+    })
+
+
+    // Using Rx here because for some reason, voteToken is sometimes undefined in the distributeTokens function.
+    // None of my research could uncover why, experimented with many approaches. Rx alternative works.
+    const distributeTokens$ = (numberOfAccounts) => range(0, numberOfAccounts).pipe(
+        mergeMap(i => voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
+    )
 
     const doVote$ = (inFavour, numberOfAccounts) => range(0, numberOfAccounts).pipe(
         mergeMap(i => delegatedVote.vote(inFavour, { from: accounts[i] }))
     )
 
-    const distributeTokens$ = (numberOfAccounts) => range(0, numberOfAccounts).pipe(
-        mergeMap(i => voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
-    )
+    // distributeTokens = async (numberOfAccounts) => {
+    //     for (let i = 0; i < numberOfAccounts; i++) {
+    //         await voteToken.transfer(accounts[i], i + 1, {from: tokenCreator})
+    //     }
+    // }
+    //
+    // doVote = async (inFavour, numberOfAccounts) => {
+    //     for (let i = 0; i < numberOfAccounts; i++) {
+    //         await delegatedVote.vote(inFavour, { from: accounts[i] })
+    //     }
+    // }
+
+    // asyncForEach = async (array, callback) => {
+    //     for (let i = 0; i < array.length; i++) {
+    //         await callback(array[i], i, array)
+    //     }
+    // }
+    // distributeTokens2 = async (numberOfAccounts) =>
+    //     await asyncForEach(Array.from(new Array(numberOfAccounts).keys()), async i => { await voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }) })
+    //
+    // distributeTokens3 = async (numberOfAccounts) => {
+    //     Array.from(new Array(numberOfAccounts).keys())
+    //         .forEach(async i => await voteToken.transfer(accounts[i], i + 1, { from: tokenCreator }))
+    // }
+    //
+
 
 })
