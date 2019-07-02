@@ -1,6 +1,12 @@
 pragma solidity ^0.4.18;
 
 
+// Memory is byte address. Eg 0x01 = first byte of memory, 0x02 = second byte of memory
+// Storage is word addressed. Eg 0x01 = first 32 bytes of storage, 0x02 = second 32 bytes of storage
+// This is why there's little point using anything other than uint256 in storage, anything stored there will still update 32 bytes.
+
+// External functions: https://ethereum.stackexchange.com/questions/19380/external-vs-public-best-practices
+// Cannot call an external function internally (this.externalFunction()) if it updates storage. Cannot
 contract AssemblyExperiment {
 
     // Used in doStandardDelegateCall()
